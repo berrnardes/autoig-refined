@@ -106,8 +106,9 @@ Incremental implementation of the Instagram Profile Optimizer, starting with dat
 - [ ] 6. Checkpoint - Scraping services
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 7. Implement Guide Generation Service
-  - [ ] 7.1 Implement guide generation with LangChain
+- [x] 7. Implement Guide Generation Service
+  - [x] 7.1 Implement guide generation with LangChain
+    - Check langchain MCP before implementation
     - Create `src/services/guide-service.ts` implementing the `GuideService` interface
     - Build LangChain prompt chain that compares user's `ProfileData` against `CompetitorData`
     - Evaluate: bio clarity/positioning, content strategy, posting consistency, value proposition, highlights/links usage
@@ -116,7 +117,7 @@ Incremental implementation of the Instagram Profile Optimizer, starting with dat
     - Validate LLM output with Zod `guideContentSchema`; retry once on parse failure with stricter prompt
     - _Requirements: 4.1, 4.2, 4.3_
 
-  - [ ] 7.2 Implement PDF generation
+  - [x] 7.2 Implement PDF generation
     - Add `generatePdf()` method that converts `GuideContent` to a formatted PDF `Buffer`
     - Verify output starts with PDF magic bytes (`%PDF`)
     - _Requirements: 4.4_
