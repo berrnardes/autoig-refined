@@ -82,8 +82,8 @@ Incremental implementation of the Instagram Profile Optimizer, starting with dat
     - **Property 7: ProfileData structural completeness**
     - **Validates: Requirements 2.6**
 
-- [ ] 5. Implement Competitor Analyzer Service
-  - [ ] 5.1 Implement competitor analyzer core logic
+- [x] 5. Implement Competitor Analyzer Service
+  - [x] 5.1 Implement competitor analyzer core logic
     - Create `src/services/competitor-service.ts` implementing the `CompetitorService` interface
     - Validate 1-5 usernames input, reject 0 or >5 with validation error
     - Call `ScrapeService.scrapeProfile()` for each competitor using `Promise.allSettled`
