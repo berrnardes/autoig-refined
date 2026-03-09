@@ -21,18 +21,19 @@ Incremental implementation of the Instagram Profile Optimizer, starting with dat
     - Create `src/lib/validators.ts` with `createEvaluationSchema` (username regex + competitors array 1-5), `profileDataSchema`, and `guideContentSchema`
     - _Requirements: 2.5, 3.3, 4.3, 5.2_
 
-- [ ] 2. Implement authentication module
-  - [ ] 2.1 Configure better-auth with Drizzle adapter
+- [x] 2. Implement authentication module
+  - [x] 2.1 Configure better-auth with Drizzle adapter
+    - Check better-auth MCP for implementation
     - Create `src/lib/auth/index.ts` with `betterAuth` config using `drizzleAdapter`
     - Create `src/lib/auth/client.ts` for client-side auth helpers
     - _Requirements: 1.1_
 
-  - [ ] 2.2 Create auth middleware for protected routes
+  - [x] 2.2 Create auth middleware for protected routes
     - Create `src/middleware.ts` that protects `/dashboard/**` and `/api/**` routes (excluding `/api/auth/**` and `/api/webhooks/**`)
     - Redirect unauthenticated users to `/login`
     - _Requirements: 1.2, 1.4_
 
-  - [ ] 2.3 Build login/signup page
+  - [x] 2.3 Build login/signup page
     - Create `src/app/login/page.tsx` with email/password form supporting both sign-up and login modes
     - Display uniform error messages on invalid credentials (do not reveal whether email or password was wrong)
     - On success, redirect to `/dashboard`
