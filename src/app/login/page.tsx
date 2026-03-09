@@ -122,7 +122,7 @@ export default function LoginPage() {
 							</p>
 						)}
 					</CardContent>
-					<CardFooter className="flex flex-col gap-3">
+					<CardFooter className="flex flex-col gap-3  mt-4">
 						<Button type="submit" className="w-full" disabled={loading}>
 							{loading ? "Loading..." : isSignUp ? "Create account" : "Sign in"}
 						</Button>

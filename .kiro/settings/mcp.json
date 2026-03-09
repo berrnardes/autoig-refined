@@ -1,0 +1,9 @@
+{
+	"mcpServers": {
+		"apify-docs": {
+			"url": "https://mcp.apify.com/?tools=docs",
+			"disabled": false,
+			"autoApprove": []
+		}
+	}
+}

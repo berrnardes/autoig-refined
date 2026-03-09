@@ -47,11 +47,12 @@ Incremental implementation of the Instagram Profile Optimizer, starting with dat
     - **Property 2: Protected route redirect**
     - **Validates: Requirements 1.4**
 
-- [ ] 3. Checkpoint - Auth module
+- [x] 3. Checkpoint - Auth module
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 4. Implement Scrape Service with caching
-  - [ ] 4.1 Implement scrape service core logic
+- [-] 4. Implement Scrape Service with caching
+  - [x] 4.1 Implement scrape service core logic
+    - Check apify MCP server before implementation
     - Create `src/services/scrape-service.ts` implementing the `ScrapeService` interface
     - Implement cache-first lookup: query `scrape_cache` table, return cached data if < 24h old
     - On cache miss or `forceRefresh=true`, call Apify `apify/instagram-profile-scraper` actor via axios
