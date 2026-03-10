@@ -170,8 +170,8 @@ Incremental implementation of the Instagram Profile Optimizer, starting with dat
 - [ ] 10. Checkpoint - Core services
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 11. Implement Evaluation Service (orchestrator)
-  - [ ] 11.1 Implement evaluation orchestration pipeline
+- [x] 11. Implement Evaluation Service (orchestrator)
+  - [x] 11.1 Implement evaluation orchestration pipeline
     - Create `src/services/evaluation-service.ts` implementing the `EvaluationService` interface
     - Orchestrate full pipeline: verify credit -> deduct credit -> scrape user profile -> scrape competitors -> generate guide -> judge guide -> store result
     - Update evaluation `status` field through each stage (`pending` -> `scraping` -> `analyzing` -> `generating` -> `judging` -> `completed`)
