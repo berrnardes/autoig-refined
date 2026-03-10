@@ -222,15 +222,15 @@ Incremental implementation of the Instagram Profile Optimizer, starting with dat
 - [ ] 13. Checkpoint - API layer
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 14. Build client UI pages
-  - [ ] 14.1 Set up TanStack React Query and Axios client
+- [x] 14. Build client UI pages
+  - [x] 14.1 Set up TanStack React Query and Axios client
     - Create `src/lib/api-client.ts` with axios instance (base URL, auth interceptor)
     - Create `src/lib/query-client.ts` with TanStack Query provider setup
     - Create custom hooks: `useCredits()`, `useEvaluations()`, `useEvaluation(id)`, `useCreateEvaluation()`
     - Wrap app layout with QueryClientProvider
     - _Requirements: 8.1, 8.2_
 
-  - [ ] 14.2 Build dashboard page
+  - [x] 14.2 Build dashboard page
     - Create `src/app/dashboard/page.tsx` displaying current credit balance and evaluation history list
     - Show evaluations in reverse chronological order with date and quality score
     - Each evaluation links to `/dashboard/evaluations/[id]`
@@ -238,7 +238,7 @@ Incremental implementation of the Instagram Profile Optimizer, starting with dat
     - Include "Buy Credits" button
     - _Requirements: 8.1, 8.2, 8.4_
 
-  - [ ] 14.3 Build multistep evaluation form
+  - [x] 14.3 Build multistep evaluation form
     - Create `src/app/dashboard/evaluate/page.tsx` with 3-step form managed by React state
     - Step 1: Your Profile - Instagram username input with `@` prefix display, validation (1-30 chars, `/^[a-zA-Z0-9._]+$/`)
     - Step 2: Competitor Profiles - Dynamic list of 1-5 competitor username fields with add/remove buttons
@@ -247,7 +247,7 @@ Incremental implementation of the Instagram Profile Optimizer, starting with dat
     - On submit: POST to `/api/evaluations`, show loading state, redirect to evaluation detail page on success
     - _Requirements: 2.1, 3.1, 3.3, 6.6, 6.7_
 
-  - [ ] 14.4 Build evaluation detail page
+  - [x] 14.4 Build evaluation detail page
     - Create `src/app/dashboard/evaluations/[id]/page.tsx` showing evaluation status, quality score, guide content, and PDF download button
     - Poll for status updates while evaluation is in progress (pending/scraping/analyzing/generating/judging)
     - Display guide content sections: summary, weaknesses, recommendations, task list
