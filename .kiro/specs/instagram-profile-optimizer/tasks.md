@@ -142,14 +142,14 @@ Incremental implementation of the Instagram Profile Optimizer, starting with dat
     - **Property 14: Judge score range invariant**
     - **Validates: Requirements 5.2**
 
-- [ ] 9. Implement Credit Service with Stripe integration
-  - [ ] 9.1 Implement credit service core logic
+- [x] 9. Implement Credit Service with Stripe integration
+  - [x] 9.1 Implement credit service core logic
     - Create `src/services/credit-service.ts` implementing the `CreditService` interface
     - Implement `getBalance()`, `deductCredit()` (with `SELECT ... FOR UPDATE` row-level locking in a transaction), and `refundCredit()`
     - Record all credit changes in `credit_transactions` table
     - _Requirements: 6.1, 6.2, 6.6, 6.7, 6.8_
 
-  - [ ] 9.2 Implement Stripe checkout and webhook handling
+  - [x] 9.2 Implement Stripe checkout and webhook handling
     - Implement `createCheckoutSession()` that creates a Stripe Checkout Session for credit purchase (price: R$ 5.00 BRL per credit)
     - Implement `handleWebhook()` for `checkout.session.completed` events: add purchased credits to user balance (idempotent - check if credits already added)
     - Handle failed payments by returning descriptive error, adding zero credits
