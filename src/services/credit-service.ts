@@ -148,6 +148,7 @@ export async function createCheckoutSession(
 		return session.url;
 	} catch (error) {
 		if (error instanceof CreditServiceError) throw error;
+		console.error("Stripe SDK error:", error);
 		throw new CreditServiceError(
 			"Failed to create checkout session. Please try again.",
 			"STRIPE_ERROR",

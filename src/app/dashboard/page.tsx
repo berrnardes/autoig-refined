@@ -76,9 +76,13 @@ export default function DashboardPage() {
 			const { data } = await api.post<{ url: string }>("/credits/checkout", {
 				quantity: 1,
 			});
+			if (!data.url) {
+				console.error("Checkout response missing URL:", data);
+				return;
+			}
 			window.location.href = data.url;
-		} catch {
-			/* Stripe redirect failed */
+		} catch (err) {
+			console.error("Failed to start checkout:", err);
 		}
 	}
 

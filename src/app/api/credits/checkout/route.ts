@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
 		);
 		return NextResponse.json({ url });
 	} catch (err) {
+		console.error("Checkout error:", err);
 		if (err instanceof CreditServiceError) {
 			return NextResponse.json({ error: err.message }, { status: 500 });
 		}

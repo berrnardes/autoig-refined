@@ -8,6 +8,8 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest) {
 	const signature = request.headers.get("stripe-signature");
 
+	console.log(request.body);
+
 	if (!signature) {
 		return NextResponse.json(
 			{ error: "Missing stripe-signature header" },
