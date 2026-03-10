@@ -130,8 +130,8 @@ Incremental implementation of the Instagram Profile Optimizer, starting with dat
     - **Property 12: PDF generation produces valid output**
     - **Validates: Requirements 4.4**
 
-- [ ] 8. Implement LLM Judge Service
-  - [ ] 8.1 Implement judge service core logic
+- [x] 8. Implement LLM Judge Service
+  - [x] 8.1 Implement judge service core logic
     - Create `src/services/judge-service.ts` implementing the `JudgeService` interface
     - Use a separate LLM call (independent model instance) to evaluate guide completeness, actionability, and relevance
     - Return score (integer 0-100) and structured feedback string

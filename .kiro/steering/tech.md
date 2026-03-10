@@ -1,42 +1,56 @@
-# Tech Stack & Build System
+# Tech Stack
 
-## Core
+## Framework & Runtime
 
-- Next.js 16 (App Router, React Server Components enabled)
-- React 19, TypeScript 5 (strict mode)
-- Node.js with npm as package manager
+- Next.js 16 (App Router, React 19, RSC enabled)
+- TypeScript (strict mode)
 
-## Styling
+## Database
+
+- PostgreSQL via `pg` driver
+- Drizzle ORM for schema definition and queries
+- Migrations in `drizzle/` directory
+
+## Authentication
+
+- better-auth with email/password
+- Drizzle adapter, Next.js cookie plugin
+- Auth schema separate from app schema (`auth-schema.ts`)
+
+## AI / LLM
+
+- LangChain (`@langchain/core`, `@langchain/openai`) with `gpt-4.1-mini`
+- Structured output via Zod schemas for type-safe LLM responses
+
+## External Services
+
+- Apify (`apify-client`) for Instagram scraping
+- Stripe for credit-based payments
+- OpenAI for guide generation and quality judging
+
+## UI
 
 - Tailwind CSS v4 (via `@tailwindcss/postcss`)
-- shadcn/ui (base-lyra style, CSS variables, neutral base color)
-- `tw-animate-css` for animations
-- `class-variance-authority` for component variants
-- `clsx` + `tailwind-merge` via `cn()` utility in `src/lib/utils.ts`
+- shadcn/ui components (base-lyra style, Phosphor icons)
+- `class-variance-authority` + `clsx` + `tailwind-merge` for class composition
+- `@react-pdf/renderer` for PDF generation
 
-## UI Components
+## Validation
 
-- Base UI (`@base-ui/react`) as the headless primitive layer under shadcn
-- Phosphor Icons (`@phosphor-icons/react`)
+- Zod v4 for runtime validation (validators in `src/lib/validators.ts`)
 
-## Planned / In-Spec (not yet installed)
+## Testing
 
-- better-auth for authentication
-- Drizzle ORM + PostgreSQL for database
-- Stripe for payments (BRL credits)
-- Apify (`apify/instagram-profile-scraper`) for Instagram data
-- LangChain for AI agent and LLM Judge
-- TanStack React Query + Axios for data fetching
+- Vitest (node environment, globals enabled)
+- fast-check for property-based testing
+- Path alias `@/` resolved in vitest config
 
 ## Common Commands
 
-- `npm run dev` — Start dev server (localhost:3000)
-- `npm run build` — Production build
-- `npm run start` — Start production server
-- `npm run lint` — Run ESLint
-
-## TypeScript Config
-
-- Path alias: `@/*` maps to `./src/*`
-- Target: ES2017, module: ESNext, bundler resolution
-- Strict mode enabled
+- `npm run dev` — start dev server
+- `npm run build` — production build
+- `npm run lint` — ESLint
+- `npx vitest --run` — run tests once
+- `npx drizzle-kit generate` — generate migration from schema changes
+- `npx drizzle-kit migrate` — apply migrations
+- `npx drizzle-kit push` — push schema directly (dev only)
