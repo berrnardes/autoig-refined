@@ -41,3 +41,15 @@ drizzle/                    # Generated SQL migrations
 - Zod schemas in `validators.ts` mirror TypeScript interfaces in `types/index.ts`
 - Client components marked with `"use client"` directive
 - UI components live in `src/components/ui/` and follow shadcn patterns
+
+## Design
+
+The UI should be mobile-first approach, and should be a Minimal AI SaaS Dashboard
+
+References: Linear, Vercel, Stripe
+
+Characteristics: clean, lots of whitespace, strong typography, subtle colors, card-based reports, data-first UI
+
+Primary Color: #01337D
+Neutrals: #1F2933, #323F4B
+Black: #121112

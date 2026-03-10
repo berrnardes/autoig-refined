@@ -196,8 +196,8 @@ Incremental implementation of the Instagram Profile Optimizer, starting with dat
     - **Property 20: Evaluation history ordering and completeness**
     - **Validates: Requirements 8.2, 8.4**
 
-- [ ] 12. Implement API routes
-  - [ ] 12.1 Create evaluation API routes
+- [x] 12. Implement API routes
+  - [x] 12.1 Create evaluation API routes
     - Create `src/app/api/evaluations/route.ts` with POST (create evaluation) and GET (list evaluations) handlers
     - Create `src/app/api/evaluations/[id]/route.ts` with GET handler for evaluation details
     - Create `src/app/api/evaluations/[id]/pdf/route.ts` with GET handler that returns PDF download
@@ -205,12 +205,12 @@ Incremental implementation of the Instagram Profile Optimizer, starting with dat
     - All routes require authentication (enforced by middleware)
     - _Requirements: 4.4, 8.2, 8.3_
 
-  - [ ] 12.2 Create credit API routes
+  - [x] 12.2 Create credit API routes
     - Create `src/app/api/credits/balance/route.ts` with GET handler returning user's credit balance
     - Create `src/app/api/credits/checkout/route.ts` with POST handler creating Stripe checkout session
     - _Requirements: 6.3, 8.1_
 
-  - [ ] 12.3 Create Stripe webhook route
+  - [x] 12.3 Create Stripe webhook route
     - Create `src/app/api/webhooks/stripe/route.ts` with POST handler for Stripe webhook events
     - Verify Stripe webhook signature, delegate to `CreditService.handleWebhook()`
     - _Requirements: 6.4_
