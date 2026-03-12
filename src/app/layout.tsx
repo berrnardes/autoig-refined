@@ -1,4 +1,5 @@
 import { QueryProvider } from "@/lib/query-client";
+import { ThemeProvider } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
@@ -31,11 +32,17 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<html lang="en" className={cn("font-mono", jetbrainsMono.variable)}>
+		<html
+			lang="en"
+			suppressHydrationWarning
+			className={cn("font-mono", jetbrainsMono.variable)}
+		>
 			<body
 				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
 			>
-				<QueryProvider>{children}</QueryProvider>
+				<ThemeProvider>
+					<QueryProvider>{children}</QueryProvider>
+				</ThemeProvider>
 			</body>
 		</html>
 	);
