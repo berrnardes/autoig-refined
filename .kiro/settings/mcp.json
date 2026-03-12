@@ -4,6 +4,11 @@
 			"url": "https://mcp.apify.com/?tools=docs",
 			"disabled": false,
 			"autoApprove": []
+		},
+		"mercadopago-mcp-server": {
+			"url": "https://mcp.mercadopago.com/mcp",
+			"disabled": false,
+			"autoApprove": []
 		}
 	}
 }

@@ -14,6 +14,7 @@ import { useCredits, useEvaluations } from "@/lib/hooks";
 import type { Evaluation } from "@/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const statusLabels: Record<string, string> = {
 	pending: "Pendente",
@@ -66,23 +67,116 @@ function EvaluationRow({ evaluation }: { evaluation: Evaluation }) {
 	);
 }
 
+interface PixData {
+	paymentId: number;
+	qrCodeBase64: string;
+	qrCode: string;
+	ticketUrl: string;
+	expiresAt: string;
+}
+
+function PixModal({ pix, onClose }: { pix: PixData; onClose: () => void }) {
+	const [copied, setCopied] = useState(false);
+
+	async function handleCopy() {
+		await navigator.clipboard.writeText(pix.qrCode);
+		setCopied(true);
+		setTimeout(() => setCopied(false), 2000);
+	}
+
+	return (
+		<div
+			className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+			onClick={onClose}
+			role="dialog"
+			aria-modal="true"
+			aria-label="Pagamento Pix"
+		>
+			<div
+				className="bg-background rounded-lg shadow-lg max-w-sm w-full p-6 space-y-4"
+				onClick={(e) => e.stopPropagation()}
+			>
+				<h2 className="text-lg font-semibold text-center">Pagar com Pix</h2>
+				<p className="text-sm text-muted-foreground text-center">
+					Escaneie o QR Code ou copie o código abaixo
+				</p>
+				<div className="flex justify-center">
+					<img
+						src={`data:image/png;base64,${pix.qrCodeBase64}`}
+						alt="QR Code Pix"
+						className="w-48 h-48"
+					/>
+				</div>
+				<div className="flex gap-2">
+					<input
+						type="text"
+						readOnly
+						value={pix.qrCode}
+						className="flex-1 min-w-0 rounded-md border border-border bg-muted px-3 py-2 text-xs truncate"
+						aria-label="Código Pix copia e cola"
+					/>
+					<Button variant="outline" size="sm" onClick={handleCopy}>
+						{copied ? "Copiado" : "Copiar"}
+					</Button>
+				</div>
+				<p className="text-xs text-muted-foreground text-center">
+					Expira em 30 minutos. Seus créditos serão adicionados automaticamente
+					após o pagamento.
+				</p>
+				<Button variant="ghost" size="sm" className="w-full" onClick={onClose}>
+					Fechar
+				</Button>
+			</div>
+		</div>
+	);
+}
+
 export default function DashboardPage() {
 	const router = useRouter();
-	const { data: balance, isLoading: creditsLoading } = useCredits();
+	const {
+		data: balance,
+		isLoading: creditsLoading,
+		refetch: refetchCredits,
+	} = useCredits();
 	const { data: evaluations, isLoading: evalsLoading } = useEvaluations();
+	const [pixData, setPixData] = useState<PixData | null>(null);
+	const [buying, setBuying] = useState(false);
+	const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+	const stopPolling = useCallback(() => {
+		if (pollRef.current) {
+			clearInterval(pollRef.current);
+			pollRef.current = null;
+		}
+	}, []);
+
+	// Poll credits while Pix modal is open to detect payment
+	useEffect(() => {
+		if (!pixData) {
+			stopPolling();
+			return;
+		}
+		const initialBalance = balance ?? 0;
+		pollRef.current = setInterval(async () => {
+			const { data: fresh } = await refetchCredits();
+			if (fresh !== undefined && fresh > initialBalance) {
+				setPixData(null);
+			}
+		}, 5000);
+		return stopPolling;
+	}, [pixData, balance, refetchCredits, stopPolling]);
 
 	async function handleBuyCredits() {
+		setBuying(true);
 		try {
-			const { data } = await api.post<{ url: string }>("/credits/checkout", {
+			const { data } = await api.post<PixData>("/credits/checkout", {
 				quantity: 1,
 			});
-			if (!data.url) {
-				console.error("Checkout response missing URL:", data);
-				return;
-			}
-			window.location.href = data.url;
+			setPixData(data);
 		} catch (err) {
 			console.error("Failed to start checkout:", err);
+		} finally {
+			setBuying(false);
 		}
 	}
 
@@ -107,8 +201,13 @@ export default function DashboardPage() {
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
-						<Button variant="outline" size="sm" onClick={handleBuyCredits}>
-							Comprar créditos
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={handleBuyCredits}
+							disabled={buying}
+						>
+							{buying ? "Gerando Pix…" : "Comprar créditos"}
 						</Button>
 					</CardContent>
 				</Card>
@@ -148,6 +247,7 @@ export default function DashboardPage() {
 					)}
 				</CardContent>
 			</Card>
+			{pixData && <PixModal pix={pixData} onClose={() => setPixData(null)} />}
 		</div>
 	);
 }

@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import {
-	createCheckoutSession,
+	createPixPayment,
 	CreditServiceError,
 } from "@/services/credit-service";
 import { headers } from "next/headers";
@@ -36,15 +36,19 @@ export async function POST(request: NextRequest) {
 	}
 
 	try {
-		const url = await createCheckoutSession(
+		const pix = await createPixPayment(
 			session.user.id,
+			session.user.email,
 			parsed.data.quantity,
 		);
-		return NextResponse.json({ url });
+		return NextResponse.json(pix);
 	} catch (err) {
 		console.error("Checkout error:", err);
 		if (err instanceof CreditServiceError) {
-			return NextResponse.json({ error: err.message }, { status: 500 });
+			return NextResponse.json(
+				{ error: err.message, code: err.code },
+				{ status: 400 },
+			);
 		}
 		return NextResponse.json(
 			{ error: "Internal server error" },

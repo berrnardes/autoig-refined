@@ -12,4 +12,4 @@ An AI-powered SaaS tool that analyzes Instagram profiles against competitors and
 
 ## Business Model
 
-Credit-based system with Stripe payments. Each evaluation consumes credits.
+Credit-based system with Mercado Pago Pix payments. Each evaluation consumes credits.

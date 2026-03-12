@@ -25,7 +25,7 @@
 ## External Services
 
 - Apify (`apify-client`) for Instagram scraping
-- Stripe for credit-based payments
+- Mercado Pago (Pix) for credit-based payments
 - OpenAI for guide generation and quality judging
 
 ## UI
