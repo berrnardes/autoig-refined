@@ -1,4 +1,6 @@
 export interface PostData {
+	postId: string;
+	shortCode: string;
 	caption: string;
 	likes: number;
 	comments: number;
@@ -8,8 +10,17 @@ export interface PostData {
 }
 
 export interface ProfileData {
+	instagramId: string;
 	username: string;
+	fullName: string;
 	bio: string;
+	url: string;
+	externalUrl: string | null;
+	isBusinessAccount: boolean;
+	businessCategoryName: string | null;
+	verified: boolean;
+	private: boolean;
+	highlightReelCount: number;
 	followerCount: number;
 	followingCount: number;
 	postCount: number;

@@ -18,6 +18,8 @@ export const createEvaluationSchema = z.object({
 });
 
 export const postDataSchema = z.object({
+	postId: z.string(),
+	shortCode: z.string(),
 	caption: z.string(),
 	likes: z.number().int().nonnegative(),
 	comments: z.number().int().nonnegative(),
@@ -27,8 +29,17 @@ export const postDataSchema = z.object({
 });
 
 export const profileDataSchema = z.object({
+	instagramId: z.string(),
 	username: z.string().min(1),
+	fullName: z.string(),
 	bio: z.string(),
+	url: z.string(),
+	externalUrl: z.string().nullable(),
+	isBusinessAccount: z.boolean(),
+	businessCategoryName: z.string().nullable(),
+	verified: z.boolean(),
+	private: z.boolean(),
+	highlightReelCount: z.number().int().nonnegative(),
 	followerCount: z.number().int().nonnegative(),
 	followingCount: z.number().int().nonnegative(),
 	postCount: z.number().int().nonnegative(),

@@ -27,7 +27,11 @@ const DEFAULT_OPTIONS: Required<ScrapeOptions> = {
 export class ScrapeServiceError extends Error {
 	constructor(
 		message: string,
-		public readonly code: "INVALID_USERNAME" | "APIFY_ERROR" | "PARSE_ERROR",
+		public readonly code:
+			| "INVALID_USERNAME"
+			| "APIFY_ERROR"
+			| "PARSE_ERROR"
+			| "EMPTY_RESPONSE",
 	) {
 		super(message);
 		this.name = "ScrapeServiceError";
@@ -60,7 +64,7 @@ async function callApify(
 			directUrls: [`https://www.instagram.com/${username}/`],
 			resultsType: options.resultsType,
 			resultsLimit: options.resultsLimit,
-			searchType: "user",
+			searchType: "profiles",
 			searchLimit: 1,
 			addParentData: options.addParentData,
 		});
@@ -84,18 +88,42 @@ function extractProfileMeta(
 	username: string,
 	items: Record<string, unknown>[],
 ): {
+	instagramId: string;
+	fullName: string;
 	bio: string;
+	url: string;
+	externalUrl: string | null;
+	isBusinessAccount: boolean;
+	businessCategoryName: string | null;
+	verified: boolean;
+	private: boolean;
+	highlightReelCount: number;
 	followerCount: number;
 	followingCount: number;
 	postCount: number;
-	fullName: string;
 } {
+	if (items.length === 0) {
+		throw new ScrapeServiceError(
+			`No items return for @${username}`,
+			"EMPTY_RESPONSE",
+		);
+	}
+
 	// When addParentData is true, each post item has profile info at the top level
 	// or nested under a key. For "details" resultsType the item IS the profile.
-	const source = items[0] ?? {};
+	const source = items[0];
 
 	return {
+		instagramId: String(source.id ?? source.ownerId ?? ""),
+		fullName: (source.fullName ?? source.ownerFullName ?? "") as string,
 		bio: (source.biography ?? source.bio ?? "") as string,
+		url: (source.url ?? `https://www.instagram.com/${username}`) as string,
+		externalUrl: (source.externalUrl as string) ?? null,
+		isBusinessAccount: (source.isBusinessAccount ?? false) as boolean,
+		businessCategoryName: (source.businessCategoryName as string) ?? null,
+		verified: (source.verified ?? false) as boolean,
+		private: (source.private ?? false) as boolean,
+		highlightReelCount: (source.highlightReelCount ?? 0) as number,
 		followerCount: (source.followersCount ??
 			source.followedByCount ??
 			0) as number,
@@ -103,7 +131,6 @@ function extractProfileMeta(
 			source.followingCount ??
 			0) as number,
 		postCount: (source.postsCount ?? source.postCount ?? 0) as number,
-		fullName: (source.fullName ?? source.ownerFullName ?? "") as string,
 	};
 }
 
@@ -118,6 +145,8 @@ function normalizePosts(items: Record<string, unknown>[]): PostData[] {
 			(caption.match(/#[\w]+/g) ?? []).map((h: string) => h.replace("#", ""));
 
 		return {
+			postId: String(item.id ?? ""),
+			shortCode: (item.shortCode ?? "") as string,
 			caption,
 			likes: (item.likesCount ?? 0) as number,
 			comments: (item.commentsCount ?? 0) as number,
@@ -179,8 +208,17 @@ function buildProfileData(
 		.map(([tag]) => tag);
 
 	return {
+		instagramId: meta.instagramId,
 		username: (items[0]?.ownerUsername as string) ?? username,
+		fullName: meta.fullName,
 		bio: meta.bio,
+		url: meta.url,
+		externalUrl: meta.externalUrl,
+		isBusinessAccount: meta.isBusinessAccount,
+		businessCategoryName: meta.businessCategoryName,
+		verified: meta.verified,
+		private: meta.private,
+		highlightReelCount: meta.highlightReelCount,
 		followerCount: meta.followerCount,
 		followingCount: meta.followingCount,
 		postCount: meta.postCount,
