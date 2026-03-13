@@ -50,9 +50,11 @@ Generate a guide with:
 2. summary: a concise executive summary of key findings
 3. performanceComparison: a table comparing key metrics (engajamento, posts/semana, uso de vídeo, hashtags) between the user and competitors
 4. weaknesses: issues found in the user's profile (with severity)
-5. recommendations: for each of the 5 criteria (bio, content_strategy, posting_consistency, value_proposition, highlights_links) — include currentState and specific recommendation
+5. recommendations: for each of the 5 criteria — include currentState and specific recommendation. The criterion field MUST be exactly one of these values in Portuguese: "Clareza e Posicionamento da Bio", "Estratégia de Conteúdo", "Consistência de Postagens", "Proposta de Valor", "Destaques e Links"
 6. contentStrategySuggestions: a list of recommended content types with descriptions (e.g. Reels de bastidores, Depoimentos de clientes)
-7. taskList: prioritized action items with priority level (high/medium/low) and estimated impact`;
+7. taskList: prioritized action items with priority level (high/medium/low) and estimated impact
+
+IMPORTANT: ALL text content (summary, descriptions, recommendations, tasks, metric names, weakness areas, content suggestions) MUST be written in Brazilian Portuguese (pt-BR). Do NOT use English for any field values.`;
 
 const REGENERATE_PROMPT = `The previous guide was evaluated and received feedback for improvement.
 
@@ -84,9 +86,11 @@ Address the feedback and generate an improved guide with:
 2. summary: a concise executive summary of key findings
 3. performanceComparison: a table comparing key metrics (engajamento, posts/semana, uso de vídeo, hashtags) between the user and competitors
 4. weaknesses: issues found in the user's profile (with severity)
-5. recommendations: for each of the 5 criteria (bio, content_strategy, posting_consistency, value_proposition, highlights_links) — include currentState and specific recommendation
+5. recommendations: for each of the 5 criteria — include currentState and specific recommendation. The criterion field MUST be exactly one of these values in Portuguese: "Clareza e Posicionamento da Bio", "Estratégia de Conteúdo", "Consistência de Postagens", "Proposta de Valor", "Destaques e Links"
 6. contentStrategySuggestions: a list of recommended content types with descriptions (e.g. Reels de bastidores, Depoimentos de clientes)
-7. taskList: prioritized action items with priority level (high/medium/low) and estimated impact`;
+7. taskList: prioritized action items with priority level (high/medium/low) and estimated impact
+
+IMPORTANT: ALL text content (summary, descriptions, recommendations, tasks, metric names, weakness areas, content suggestions) MUST be written in Brazilian Portuguese (pt-BR). Do NOT use English for any field values.`;
 
 function buildTemplateVars(
 	profile: ProfileData,
@@ -170,7 +174,9 @@ export async function generateGuide(
 					"Every field is required. profileScore must be an integer 0–100. " +
 					"performanceComparison and contentStrategySuggestions must have at least one entry. " +
 					"severity, priority, and estimatedImpact must be exactly 'high', 'medium', or 'low'. " +
-					"You must include recommendations for all 5 criteria: bio, content_strategy, posting_consistency, value_proposition, highlights_links.",
+					"You must include recommendations for all 5 criteria using EXACTLY these Portuguese names: " +
+					'"Clareza e Posicionamento da Bio", "Estratégia de Conteúdo", "Consistência de Postagens", "Proposta de Valor", "Destaques e Links". ' +
+					"ALL text content must be in Brazilian Portuguese (pt-BR).",
 			],
 			["user", GENERATE_PROMPT],
 		]);
@@ -213,7 +219,9 @@ export async function regenerateGuide(
 					"profileScore must be an integer 0–100. " +
 					"performanceComparison and contentStrategySuggestions must have at least one entry. " +
 					"severity, priority, and estimatedImpact must be exactly 'high', 'medium', or 'low'. " +
-					"You must include recommendations for all 5 criteria: bio, content_strategy, posting_consistency, value_proposition, highlights_links.",
+					"You must include recommendations for all 5 criteria using EXACTLY these Portuguese names: " +
+					'"Clareza e Posicionamento da Bio", "Estratégia de Conteúdo", "Consistência de Postagens", "Proposta de Valor", "Destaques e Links". ' +
+					"ALL text content must be in Brazilian Portuguese (pt-BR).",
 			],
 			["user", REGENERATE_PROMPT],
 		]);

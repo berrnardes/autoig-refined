@@ -76,7 +76,13 @@ export const guideContentSchema = z.object({
 	recommendations: z
 		.array(
 			z.object({
-				criterion: z.string(),
+				criterion: z.enum([
+					"Clareza e Posicionamento da Bio",
+					"Estratégia de Conteúdo",
+					"Consistência de Postagens",
+					"Proposta de Valor",
+					"Destaques e Links",
+				]),
 				currentState: z.string(),
 				recommendation: z.string(),
 				priority: z.number().int().positive(),

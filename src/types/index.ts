@@ -70,7 +70,12 @@ export interface GuideContent {
 		severity: "high" | "medium" | "low";
 	}>;
 	recommendations: Array<{
-		criterion: string;
+		criterion:
+			| "Clareza e Posicionamento da Bio"
+			| "Estratégia de Conteúdo"
+			| "Consistência de Postagens"
+			| "Proposta de Valor"
+			| "Destaques e Links";
 		currentState: string;
 		recommendation: string;
 		priority: number;
