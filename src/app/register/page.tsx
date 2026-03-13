@@ -23,6 +23,7 @@ export default function RegisterPage() {
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
+	const [acceptedTerms, setAcceptedTerms] = useState(false);
 
 	async function handleSubmit(e: React.FormEvent) {
 		e.preventDefault();
@@ -91,6 +92,38 @@ export default function RegisterPage() {
 								minLength={8}
 							/>
 						</div>
+						<label
+							htmlFor="terms"
+							className="flex items-center gap-2 cursor-pointer"
+						>
+							<input
+								id="terms"
+								type="checkbox"
+								checked={acceptedTerms}
+								onChange={(e) => setAcceptedTerms(e.target.checked)}
+								className="h-4 w-4 shrink-0 rounded border border-input accent-[#01337D]"
+								required
+							/>
+							<span className="text-xs text-muted-foreground leading-snug">
+								Li e concordo com os{" "}
+								<Link
+									href="/termos-de-uso"
+									target="_blank"
+									className="underline hover:text-foreground"
+								>
+									Termos de Uso
+								</Link>{" "}
+								e a{" "}
+								<Link
+									href="/politica-de-privacidade"
+									target="_blank"
+									className="underline hover:text-foreground"
+								>
+									Política de Privacidade
+								</Link>
+								.
+							</span>
+						</label>
 						{error && (
 							<p className="text-sm text-destructive" role="alert">
 								{error}
@@ -98,7 +131,11 @@ export default function RegisterPage() {
 						)}
 					</CardContent>
 					<CardFooter className="flex flex-col gap-3 mt-4">
-						<Button type="submit" className="w-full" disabled={loading}>
+						<Button
+							type="submit"
+							className="w-full"
+							disabled={loading || !acceptedTerms}
+						>
 							{loading ? "Criando..." : "Criar conta"}
 						</Button>
 						<Link
