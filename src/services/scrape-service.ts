@@ -29,6 +29,7 @@ export class ScrapeServiceError extends Error {
 		message: string,
 		public readonly code:
 			| "INVALID_USERNAME"
+			| "PRIVATE_PROFILE"
 			| "APIFY_ERROR"
 			| "PARSE_ERROR"
 			| "EMPTY_RESPONSE",
@@ -306,12 +307,19 @@ export const scrapeService = {
 		// Check for error responses from the actor
 		if (items[0].error || items[0].profileNotFound) {
 			throw new ScrapeServiceError(
-				`Instagram profile "${normalizedUsername}" does not exist or is private`,
+				`Instagram profile "${normalizedUsername}" does not exist`,
 				"INVALID_USERNAME",
 			);
 		}
 
+		// Check if profile is private (no posts returned but profile exists)
 		const profileData = buildProfileData(normalizedUsername, items);
+		if (profileData.private) {
+			throw new ScrapeServiceError(
+				`Instagram profile "${normalizedUsername}" is private`,
+				"PRIVATE_PROFILE",
+			);
+		}
 
 		const parsed = profileDataSchema.safeParse(profileData);
 		if (!parsed.success) {

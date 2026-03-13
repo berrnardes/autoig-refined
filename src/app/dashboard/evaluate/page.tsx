@@ -146,11 +146,64 @@ function StepIndicator({ step }: { step: number }) {
 	);
 }
 
+function getSubmitErrorMessage(err: unknown): {
+	message: string;
+	field?: "username" | "competitors";
+} {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const data = (err as any)?.response?.data;
+	const raw: string =
+		data?.error ??
+		(err instanceof Error
+			? err.message
+			: "Erro ao criar avaliação. Tente novamente.");
+
+	if (raw.includes("private") || raw.includes("privado")) {
+		return {
+			message: "Este perfil é privado e não pode ser analisado.",
+			field: "username",
+		};
+	}
+	if (
+		raw.includes("not found") ||
+		raw.includes("não encontrado") ||
+		raw.includes("does not exist") ||
+		raw.includes("INVALID_USERNAME")
+	) {
+		return {
+			message: "Perfil não encontrado. Verifique o nome de usuário.",
+			field: "username",
+		};
+	}
+	if (
+		raw.includes("competitor") ||
+		raw.includes("concorrente") ||
+		raw.includes("All competitor")
+	) {
+		return {
+			message: "Um ou mais perfis concorrentes são privados ou não existem.",
+			field: "competitors",
+		};
+	}
+	if (
+		raw.includes("INSUFFICIENT_CREDITS") ||
+		raw.includes("crédito") ||
+		raw.includes("credit")
+	) {
+		return { message: "Créditos insuficientes para realizar a avaliação." };
+	}
+	return { message: "Erro ao criar avaliação. Tente novamente." };
+}
+
 export default function EvaluatePage() {
 	const [step, setStep] = useState(0);
 	const [username, setUsername] = useState("");
 	const [competitors, setCompetitors] = useState([""]);
 	const [errors, setErrors] = useState<Record<string, string>>({});
+	const [submitError, setSubmitError] = useState<{
+		message: string;
+		field?: "username" | "competitors";
+	} | null>(null);
 
 	const { data: balance, isLoading: creditsLoading } = useCredits();
 	const createEvaluation = useCreateEvaluation();
@@ -182,12 +235,14 @@ export default function EvaluatePage() {
 	}
 
 	function handleNext() {
+		setSubmitError(null);
 		if (step === 0 && validateStep0()) setStep(1);
 		else if (step === 1 && validateStep1()) setStep(2);
 	}
 
 	function handleBack() {
 		setErrors({});
+		setSubmitError(null);
 		setStep((s) => Math.max(0, s - 1));
 	}
 
@@ -207,7 +262,18 @@ export default function EvaluatePage() {
 	}
 
 	function handleSubmit() {
-		createEvaluation.mutate({ username, competitors });
+		setSubmitError(null);
+		createEvaluation.mutate(
+			{ username, competitors },
+			{
+				onError: (err) => {
+					const parsed = getSubmitErrorMessage(err);
+					setSubmitError(parsed);
+					if (parsed.field === "username") setStep(0);
+					else if (parsed.field === "competitors") setStep(1);
+				},
+			},
+		);
 	}
 
 	return (
@@ -246,6 +312,11 @@ export default function EvaluatePage() {
 							</div>
 							{errors.username && (
 								<p className="text-xs text-destructive">{errors.username}</p>
+							)}
+							{submitError?.field === "username" && (
+								<p className="text-xs text-destructive">
+									{submitError.message}
+								</p>
 							)}
 						</div>
 					</CardContent>
@@ -304,6 +375,9 @@ export default function EvaluatePage() {
 								+ Adicionar
 							</Button>
 						)}
+						{submitError?.field === "competitors" && (
+							<p className="text-xs text-destructive">{submitError.message}</p>
+						)}
 					</CardContent>
 					<CardFooter className="justify-between">
 						<Button variant="ghost" onClick={handleBack}>
@@ -345,11 +419,8 @@ export default function EvaluatePage() {
 								{creditsLoading ? "…" : (balance ?? 0)}
 							</span>
 						</div>
-						{createEvaluation.error && (
-							<p className="text-xs text-destructive">
-								{(createEvaluation.error as Error).message ||
-									"Erro ao criar avaliação. Tente novamente."}
-							</p>
+						{submitError && !submitError.field && (
+							<p className="text-xs text-destructive">{submitError.message}</p>
 						)}
 					</CardContent>
 					<CardFooter className="justify-between">

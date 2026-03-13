@@ -40,8 +40,22 @@ export async function POST(request: NextRequest) {
 		return NextResponse.json(evaluation, { status: 201 });
 	} catch (err) {
 		if (err instanceof EvaluationServiceError) {
-			const status = err.code === "INSUFFICIENT_CREDITS" ? 402 : 500;
-			return NextResponse.json({ error: err.message }, { status });
+			if (err.code === "INSUFFICIENT_CREDITS") {
+				return NextResponse.json(
+					{ error: err.message, code: err.code },
+					{ status: 402 },
+				);
+			}
+			if (err.code === "SCRAPE_FAILED") {
+				return NextResponse.json(
+					{ error: err.message, code: err.code },
+					{ status: 422 },
+				);
+			}
+			return NextResponse.json(
+				{ error: err.message, code: err.code },
+				{ status: 500 },
+			);
 		}
 		return NextResponse.json(
 			{ error: "Internal server error" },
