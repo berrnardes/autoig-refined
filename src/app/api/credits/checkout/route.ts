@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { checkoutLimiter, rateLimitResponse } from "@/lib/rate-limit";
 import {
 	createPixPayment,
 	CreditServiceError,
@@ -19,6 +20,9 @@ export async function POST(request: NextRequest) {
 	if (!session) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
+
+	const { allowed, retryAfterMs } = checkoutLimiter.check(session.user.id);
+	if (!allowed) return rateLimitResponse(retryAfterMs);
 
 	let body: unknown;
 	try {

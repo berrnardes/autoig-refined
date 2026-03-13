@@ -1,4 +1,5 @@
 import { auth } from "@/lib/auth";
+import { evaluationLimiter, rateLimitResponse } from "@/lib/rate-limit";
 import { createEvaluationSchema } from "@/lib/validators";
 import {
 	evaluationService,
@@ -15,6 +16,9 @@ export async function POST(request: NextRequest) {
 	if (!session) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
+
+	const { allowed, retryAfterMs } = evaluationLimiter.check(session.user.id);
+	if (!allowed) return rateLimitResponse(retryAfterMs);
 
 	let body: unknown;
 	try {
