@@ -20,10 +20,51 @@ const geistMono = Geist_Mono({
 	subsets: ["latin"],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://autoig.com.br";
+
 export const metadata: Metadata = {
-	title: "Instagram Profile Optimizer",
+	metadataBase: new URL(SITE_URL),
+	title: {
+		default: "AutoIG — Otimize seu perfil do Instagram com IA",
+		template: "%s | AutoIG",
+	},
 	description:
-		"AI-powered Instagram profile optimization and competitor analysis",
+		"Analise seu perfil do Instagram, compare com concorrentes e receba um relatório com melhorias práticas gerado por IA.",
+	keywords: [
+		"Instagram",
+		"otimização de perfil",
+		"análise de concorrentes",
+		"IA",
+		"marketing digital",
+		"engajamento Instagram",
+		"bio Instagram",
+		"estratégia de conteúdo",
+	],
+	authors: [{ name: "AutoIG", url: SITE_URL }],
+	creator: "AutoIG",
+	openGraph: {
+		type: "website",
+		locale: "pt_BR",
+		url: SITE_URL,
+		siteName: "AutoIG",
+		title: "AutoIG — Otimize seu perfil do Instagram com IA",
+		description:
+			"Analise seu perfil do Instagram, compare com concorrentes e receba um relatório com melhorias práticas gerado por IA.",
+	},
+	twitter: {
+		card: "summary_large_image",
+		title: "AutoIG — Otimize seu perfil do Instagram com IA",
+		description:
+			"Analise seu perfil, compare com concorrentes e receba melhorias práticas geradas por IA.",
+	},
+	robots: {
+		index: true,
+		follow: true,
+		googleBot: { index: true, follow: true },
+	},
+	alternates: {
+		canonical: SITE_URL,
+	},
 };
 
 export default function RootLayout({
@@ -33,7 +74,7 @@ export default function RootLayout({
 }>) {
 	return (
 		<html
-			lang="en"
+			lang="pt-BR"
 			suppressHydrationWarning
 			className={cn("font-mono", jetbrainsMono.variable)}
 		>
