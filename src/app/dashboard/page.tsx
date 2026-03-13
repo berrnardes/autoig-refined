@@ -222,7 +222,13 @@ export default function DashboardPage() {
 					<Button
 						variant="ghost"
 						size="sm"
-						onClick={() => signOut().then(() => router.push("/login"))}
+						onClick={() =>
+							signOut({
+								fetchOptions: {
+									onSuccess: () => router.push("/login"),
+								},
+							})
+						}
 					>
 						Sair
 					</Button>
