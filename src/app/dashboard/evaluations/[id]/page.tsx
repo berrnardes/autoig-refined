@@ -154,6 +154,9 @@ function GuideDisplay({
 }) {
 	return (
 		<div className="flex flex-col gap-4">
+			<Button onClick={onDownload} className="self-start">
+				Baixar PDF
+			</Button>
 			<Card>
 				<CardHeader>
 					<CardTitle>Resumo</CardTitle>
@@ -164,6 +167,36 @@ function GuideDisplay({
 			</Card>
 
 			<Card>
+				<CardHeader>
+					<CardTitle>Tarefas</CardTitle>
+					<CardDescription>Ordenadas por prioridade</CardDescription>
+				</CardHeader>
+				<CardContent className="flex flex-col gap-2">
+					{guide.taskList
+						.sort(
+							(a, b) => priorityOrder[a.priority] - priorityOrder[b.priority],
+						)
+						.map((t, i) => (
+							<label
+								key={i}
+								className="flex items-center gap-3 p-2 rounded-md hover:bg-neutral-50 cursor-pointer transition-colors"
+							>
+								<input
+									type="checkbox"
+									className="w-4 h-4 rounded border-neutral-300 text-[#01337D] focus:ring-[#01337D] focus:ring-offset-0 cursor-pointer"
+								/>
+								<span className="text-sm flex-1">{t.task}</span>
+								<span
+									className={`text-xs shrink-0 ${severityColors[t.estimatedImpact] ?? ""}`}
+								>
+									{impactLabels[t.estimatedImpact] ?? t.estimatedImpact}
+								</span>
+							</label>
+						))}
+				</CardContent>
+			</Card>
+
+			{/* <Card>
 				<CardHeader>
 					<CardTitle>Pontos fracos</CardTitle>
 				</CardHeader>
@@ -202,32 +235,7 @@ function GuideDisplay({
 				</CardContent>
 			</Card>
 
-			<Card>
-				<CardHeader>
-					<CardTitle>Tarefas</CardTitle>
-					<CardDescription>Ordenadas por prioridade</CardDescription>
-				</CardHeader>
-				<CardContent className="flex flex-col gap-2">
-					{guide.taskList
-						.sort(
-							(a, b) => priorityOrder[a.priority] - priorityOrder[b.priority],
-						)
-						.map((t, i) => (
-							<div key={i} className="flex items-center justify-between gap-2">
-								<span className="text-sm">{t.task}</span>
-								<span
-									className={`text-xs shrink-0 ${severityColors[t.estimatedImpact] ?? ""}`}
-								>
-									{impactLabels[t.estimatedImpact] ?? t.estimatedImpact}
-								</span>
-							</div>
-						))}
-				</CardContent>
-			</Card>
-
-			<Button onClick={onDownload} className="self-start">
-				Baixar PDF
-			</Button>
+			 */}
 		</div>
 	);
 }
