@@ -112,12 +112,6 @@ export const evaluationService = {
 			);
 		}
 
-		// 3. Fire off the pipeline in the background — don't await
-		this.runPipeline(row.id, userId, username, competitors).catch(() => {
-			// Pipeline handles its own error/refund logic; this catch
-			// prevents unhandled-rejection noise in the runtime.
-		});
-
 		return toEvaluation(row);
 	},
 

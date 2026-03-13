@@ -6,7 +6,7 @@ import {
 	EvaluationServiceError,
 } from "@/services/evaluation-service";
 import { headers } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
+import { after, NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
 	const session = await auth.api.getSession({
@@ -41,8 +41,19 @@ export async function POST(request: NextRequest) {
 			parsed.data.username,
 			parsed.data.competitors,
 		);
-		// Returns immediately with a pending evaluation.
-		// The pipeline runs in the background; client polls GET /evaluations/:id.
+
+		// Schedule the heavy pipeline via after() so the serverless runtime
+		// keeps the function alive until it completes, instead of killing it
+		// right after the 202 response is sent.
+		after(
+			evaluationService.runPipeline(
+				evaluation.id,
+				session.user.id,
+				parsed.data.username,
+				parsed.data.competitors,
+			),
+		);
+
 		return NextResponse.json(evaluation, { status: 202 });
 	} catch (err) {
 		if (err instanceof EvaluationServiceError) {
