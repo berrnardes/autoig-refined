@@ -53,7 +53,17 @@ export const profileDataSchema = z.object({
 });
 
 export const guideContentSchema = z.object({
+	profileScore: z.number().int().min(0).max(100),
 	summary: z.string().min(1, "Summary is required"),
+	performanceComparison: z
+		.array(
+			z.object({
+				metric: z.string(),
+				userValue: z.string(),
+				competitorValue: z.string(),
+			}),
+		)
+		.min(1, "At least one performance metric is required"),
 	weaknesses: z
 		.array(
 			z.object({
@@ -73,11 +83,19 @@ export const guideContentSchema = z.object({
 			}),
 		)
 		.min(1, "At least one recommendation is required"),
+	contentStrategySuggestions: z
+		.array(
+			z.object({
+				type: z.string(),
+				description: z.string(),
+			}),
+		)
+		.min(1, "At least one content strategy suggestion is required"),
 	taskList: z
 		.array(
 			z.object({
 				task: z.string(),
-				priority: z.number().int().positive(),
+				priority: z.enum(["high", "medium", "low"]),
 				estimatedImpact: z.enum(["high", "medium", "low"]),
 			}),
 		)

@@ -49,8 +49,21 @@ export interface CompetitorData {
 	failedUsernames: string[];
 }
 
+export interface PerformanceMetric {
+	metric: string;
+	userValue: string;
+	competitorValue: string;
+}
+
+export interface ContentSuggestion {
+	type: string;
+	description: string;
+}
+
 export interface GuideContent {
+	profileScore: number; // 0–100
 	summary: string;
+	performanceComparison: PerformanceMetric[];
 	weaknesses: Array<{
 		area: string;
 		description: string;
@@ -62,9 +75,10 @@ export interface GuideContent {
 		recommendation: string;
 		priority: number;
 	}>;
+	contentStrategySuggestions: ContentSuggestion[];
 	taskList: Array<{
 		task: string;
-		priority: number;
+		priority: "high" | "medium" | "low";
 		estimatedImpact: "high" | "medium" | "low";
 	}>;
 }

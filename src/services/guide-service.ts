@@ -46,10 +46,13 @@ const GENERATE_PROMPT = `Analyze this Instagram profile against the competitor d
 {competitorDetails}
 
 Generate a guide with:
-1. A summary of key findings
-2. Weaknesses found in the user's profile (with severity)
-3. Recommendations for each of the 5 evaluation criteria (bio, content_strategy, posting_consistency, value_proposition, highlights_links)
-4. A prioritized task list with estimated impact`;
+1. profileScore: an overall score from 0–100 based on the profile's performance vs competitors
+2. summary: a concise executive summary of key findings
+3. performanceComparison: a table comparing key metrics (engajamento, posts/semana, uso de vídeo, hashtags) between the user and competitors
+4. weaknesses: issues found in the user's profile (with severity)
+5. recommendations: for each of the 5 criteria (bio, content_strategy, posting_consistency, value_proposition, highlights_links) — include currentState and specific recommendation
+6. contentStrategySuggestions: a list of recommended content types with descriptions (e.g. Reels de bastidores, Depoimentos de clientes)
+7. taskList: prioritized action items with priority level (high/medium/low) and estimated impact`;
 
 const REGENERATE_PROMPT = `The previous guide was evaluated and received feedback for improvement.
 
@@ -77,10 +80,13 @@ const REGENERATE_PROMPT = `The previous guide was evaluated and received feedbac
 {competitorDetails}
 
 Address the feedback and generate an improved guide with:
-1. A summary of key findings
-2. Weaknesses found in the user's profile (with severity)
-3. Recommendations for each of the 5 evaluation criteria (bio, content_strategy, posting_consistency, value_proposition, highlights_links)
-4. A prioritized task list with estimated impact`;
+1. profileScore: an overall score from 0–100 based on the profile's performance vs competitors
+2. summary: a concise executive summary of key findings
+3. performanceComparison: a table comparing key metrics (engajamento, posts/semana, uso de vídeo, hashtags) between the user and competitors
+4. weaknesses: issues found in the user's profile (with severity)
+5. recommendations: for each of the 5 criteria (bio, content_strategy, posting_consistency, value_proposition, highlights_links) — include currentState and specific recommendation
+6. contentStrategySuggestions: a list of recommended content types with descriptions (e.g. Reels de bastidores, Depoimentos de clientes)
+7. taskList: prioritized action items with priority level (high/medium/low) and estimated impact`;
 
 function buildTemplateVars(
 	profile: ProfileData,
@@ -161,9 +167,9 @@ export async function generateGuide(
 				"system",
 				SYSTEM_PROMPT +
 					"\n\nCRITICAL: You MUST return valid structured data. " +
-					"Every field is required. Severity must be exactly 'high', 'medium', or 'low'. " +
-					"estimatedImpact must be exactly 'high', 'medium', or 'low'. " +
-					"Priority must be a positive integer. " +
+					"Every field is required. profileScore must be an integer 0–100. " +
+					"performanceComparison and contentStrategySuggestions must have at least one entry. " +
+					"severity, priority, and estimatedImpact must be exactly 'high', 'medium', or 'low'. " +
 					"You must include recommendations for all 5 criteria: bio, content_strategy, posting_consistency, value_proposition, highlights_links.",
 			],
 			["user", GENERATE_PROMPT],
@@ -204,9 +210,9 @@ export async function regenerateGuide(
 				SYSTEM_PROMPT +
 					"\n\nCRITICAL: You MUST return valid structured data. " +
 					"Every field is required. Address the judge feedback directly. " +
-					"Severity must be exactly 'high', 'medium', or 'low'. " +
-					"estimatedImpact must be exactly 'high', 'medium', or 'low'. " +
-					"Priority must be a positive integer. " +
+					"profileScore must be an integer 0–100. " +
+					"performanceComparison and contentStrategySuggestions must have at least one entry. " +
+					"severity, priority, and estimatedImpact must be exactly 'high', 'medium', or 'low'. " +
 					"You must include recommendations for all 5 criteria: bio, content_strategy, posting_consistency, value_proposition, highlights_links.",
 			],
 			["user", REGENERATE_PROMPT],
