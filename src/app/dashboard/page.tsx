@@ -62,7 +62,7 @@ function EvaluationRow({ evaluation }: { evaluation: Evaluation }) {
 				<span className="text-muted-foreground text-xs">
 					{statusLabels[evaluation.status] ?? evaluation.status}
 				</span>
-				<ScoreBadge score={evaluation.qualityScore} />
+				<ScoreBadge score={evaluation.guideContent?.profileScore!} />
 			</div>
 		</Link>
 	);

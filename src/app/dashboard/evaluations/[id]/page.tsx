@@ -36,6 +36,12 @@ const impactLabels: Record<string, string> = {
 	low: "Baixo",
 };
 
+const priorityOrder: Record<string, number> = {
+	high: 1,
+	medium: 2,
+	low: 3,
+};
+
 function isInProgress(status: string) {
 	return ["pending", "scraping", "analyzing", "generating", "judging"].includes(
 		status,
@@ -94,10 +100,10 @@ export default function EvaluationDetailPage({
 						{statusLabels[evaluation.status] ?? evaluation.status}
 					</p>
 				</div>
-				{evaluation.qualityScore !== null && (
+				{evaluation.guideContent?.profileScore !== undefined && (
 					<div className="text-right">
 						<p className="text-2xl font-semibold tabular-nums">
-							{evaluation.qualityScore}
+							{evaluation.guideContent.profileScore}
 						</p>
 						<p className="text-xs text-muted-foreground">/ 100</p>
 					</div>
@@ -203,7 +209,9 @@ function GuideDisplay({
 				</CardHeader>
 				<CardContent className="flex flex-col gap-2">
 					{guide.taskList
-						.sort((a, b) => a.priority - b.priority)
+						.sort(
+							(a, b) => priorityOrder[a.priority] - priorityOrder[b.priority],
+						)
 						.map((t, i) => (
 							<div key={i} className="flex items-center justify-between gap-2">
 								<span className="text-sm">{t.task}</span>
