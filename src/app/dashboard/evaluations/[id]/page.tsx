@@ -48,6 +48,61 @@ function isInProgress(status: string) {
 	);
 }
 
+const PIPELINE_STEPS: { key: string; label: string }[] = [
+	{ key: "pending", label: "Preparando avaliação" },
+	{ key: "scraping", label: "Coletando dados do perfil" },
+	{ key: "analyzing", label: "Analisando concorrentes" },
+	{ key: "generating", label: "Gerando guia com IA" },
+	{ key: "judging", label: "Avaliando qualidade" },
+];
+
+function PipelineProgress({ status }: { status: string }) {
+	const currentIndex = PIPELINE_STEPS.findIndex((s) => s.key === status);
+
+	return (
+		<Card className="mb-6">
+			<CardContent className="py-6">
+				<div className="flex flex-col gap-2.5">
+					{PIPELINE_STEPS.map((step, i) => {
+						const done = i < currentIndex;
+						const active = i === currentIndex;
+						return (
+							<div key={step.key} className="flex items-center gap-3">
+								<div
+									className={`h-1.5 w-1.5 rounded-full shrink-0 transition-colors duration-300 ${
+										done
+											? "bg-[#01337D]"
+											: active
+												? "bg-[#01337D] animate-pulse"
+												: "bg-neutral-200"
+									}`}
+								/>
+								<span
+									className={`text-sm transition-colors duration-300 ${
+										done
+											? "text-muted-foreground line-through"
+											: active
+												? "text-foreground font-medium"
+												: "text-muted-foreground/50"
+									}`}
+								>
+									{step.label}
+								</span>
+								{done && (
+									<span className="ml-auto text-xs text-[#01337D]">✓</span>
+								)}
+							</div>
+						);
+					})}
+				</div>
+				<p className="text-xs text-muted-foreground text-center mt-4">
+					Isso pode levar alguns minutos.
+				</p>
+			</CardContent>
+		</Card>
+	);
+}
+
 export default function EvaluationDetailPage({
 	params,
 }: {
@@ -110,20 +165,7 @@ export default function EvaluationDetailPage({
 				)}
 			</div>
 
-			{inProgress && (
-				<Card className="mb-6">
-					<CardContent className="py-8 text-center">
-						<div
-							className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-current border-t-transparent mb-3"
-							role="status"
-							aria-label="Processando"
-						/>
-						<p className="text-sm text-muted-foreground">
-							{statusLabels[evaluation.status]}
-						</p>
-					</CardContent>
-				</Card>
-			)}
+			{inProgress && <PipelineProgress status={evaluation.status} />}
 
 			{evaluation.status === "failed" && (
 				<Card className="mb-6">

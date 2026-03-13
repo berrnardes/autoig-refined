@@ -41,19 +41,15 @@ export async function POST(request: NextRequest) {
 			parsed.data.username,
 			parsed.data.competitors,
 		);
-		return NextResponse.json(evaluation, { status: 201 });
+		// Returns immediately with a pending evaluation.
+		// The pipeline runs in the background; client polls GET /evaluations/:id.
+		return NextResponse.json(evaluation, { status: 202 });
 	} catch (err) {
 		if (err instanceof EvaluationServiceError) {
 			if (err.code === "INSUFFICIENT_CREDITS") {
 				return NextResponse.json(
 					{ error: err.message, code: err.code },
 					{ status: 402 },
-				);
-			}
-			if (err.code === "SCRAPE_FAILED") {
-				return NextResponse.json(
-					{ error: err.message, code: err.code },
-					{ status: 422 },
 				);
 			}
 			return NextResponse.json(

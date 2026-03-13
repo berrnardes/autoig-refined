@@ -77,11 +77,10 @@ function toEvaluation(row: typeof evaluations.$inferSelect): Evaluation {
 
 export const evaluationService = {
 	/**
-	 * Orchestrate the full evaluation pipeline:
-	 * verify credit → deduct → scrape user → scrape competitors →
-	 * generate guide → judge → (regenerate if < 60) → store result.
-	 *
-	 * On any failure after credit deduction, refunds the credit.
+	 * Create an evaluation record, deduct credit, and kick off the pipeline
+	 * in the background. Returns immediately with the pending evaluation so
+	 * the HTTP response is fast. The client polls GET /evaluations/:id for
+	 * progress updates.
 	 */
 	async createEvaluation(
 		userId: string,
@@ -99,15 +98,42 @@ export const evaluationService = {
 			})
 			.returning();
 
-		const evalId = row.id;
-		let creditDeducted = false;
-
+		// 2. Deduct credit (synchronous — fast DB operation, must fail before we start work)
 		try {
-			// 2. Deduct credit
 			await deductCredit(userId);
-			creditDeducted = true;
+		} catch (err) {
+			await updateStatus(row.id, "failed");
+			if (err instanceof CreditServiceError) {
+				throw new EvaluationServiceError(err.message, "INSUFFICIENT_CREDITS");
+			}
+			throw new EvaluationServiceError(
+				`Credit deduction failed: ${err instanceof Error ? err.message : String(err)}`,
+				"INTERNAL_ERROR",
+			);
+		}
 
-			// 3. Scrape user profile
+		// 3. Fire off the pipeline in the background — don't await
+		this.runPipeline(row.id, userId, username, competitors).catch(() => {
+			// Pipeline handles its own error/refund logic; this catch
+			// prevents unhandled-rejection noise in the runtime.
+		});
+
+		return toEvaluation(row);
+	},
+
+	/**
+	 * Run the heavy evaluation pipeline (scrape → analyze → generate → judge).
+	 * Updates the evaluation status at each step. Refunds credit on failure.
+	 * Designed to run in the background after the HTTP response is sent.
+	 */
+	async runPipeline(
+		evalId: string,
+		userId: string,
+		username: string,
+		competitors: string[],
+	): Promise<void> {
+		try {
+			// Scrape user profile
 			await updateStatus(evalId, "scraping");
 			let profileData: ProfileData;
 			try {
@@ -123,7 +149,7 @@ export const evaluationService = {
 				);
 			}
 
-			// 4. Scrape and analyze competitors
+			// Scrape and analyze competitors
 			await updateStatus(evalId, "analyzing");
 			let competitorData: CompetitorData;
 			try {
@@ -138,7 +164,7 @@ export const evaluationService = {
 				);
 			}
 
-			// 5. Generate guide
+			// Generate guide
 			await updateStatus(evalId, "generating");
 			let guide: GuideContent;
 			try {
@@ -150,7 +176,7 @@ export const evaluationService = {
 				);
 			}
 
-			// 6. Judge guide
+			// Judge guide
 			await updateStatus(evalId, "judging");
 			let judgeResult: { score: number; feedback: string };
 			try {
@@ -162,7 +188,7 @@ export const evaluationService = {
 				);
 			}
 
-			// 7. Regenerate if score < threshold
+			// Regenerate if score < threshold
 			if (judgeResult.score < REGENERATION_THRESHOLD) {
 				try {
 					guide = await guideService.regenerateGuide(
@@ -176,41 +202,20 @@ export const evaluationService = {
 				}
 			}
 
-			// 8. Store final result
+			// Store final result
 			await updateStatus(evalId, "completed", {
 				guideContent: guide,
 				qualityScore: judgeResult.score,
 			});
-
-			return toEvaluation({
-				...row,
-				guideContent: guide,
-				qualityScore: judgeResult.score,
-				status: "completed",
-				updatedAt: new Date(),
-			});
 		} catch (err) {
-			// Refund credit if it was deducted
-			if (creditDeducted) {
-				try {
-					await refundCredit(userId);
-				} catch {
-					// Log but don't mask the original error
-				}
+			// Refund credit on any pipeline failure
+			try {
+				await refundCredit(userId);
+			} catch {
+				// Log but don't mask the original error
 			}
 
 			await updateStatus(evalId, "failed");
-
-			if (err instanceof CreditServiceError) {
-				throw new EvaluationServiceError(err.message, "INSUFFICIENT_CREDITS");
-			}
-			if (err instanceof EvaluationServiceError) {
-				throw err;
-			}
-			throw new EvaluationServiceError(
-				`Evaluation failed: ${err instanceof Error ? err.message : String(err)}`,
-				"INTERNAL_ERROR",
-			);
 		}
 	},
 

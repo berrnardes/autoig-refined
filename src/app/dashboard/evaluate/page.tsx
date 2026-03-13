@@ -278,7 +278,6 @@ export default function EvaluatePage() {
 
 	return (
 		<div className="mx-auto max-w-lg px-4 py-8 sm:py-12">
-			{createEvaluation.isPending && <EvaluationLoader username={username} />}
 			<Link
 				href="/dashboard"
 				className="text-xs text-muted-foreground hover:text-foreground mb-4 inline-block"
