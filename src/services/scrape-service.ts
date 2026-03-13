@@ -197,9 +197,6 @@ function buildProfileData(
 	const meta = extractProfileMeta(username, items);
 	const posts = extractPosts(items);
 
-	console.log("##### META PROFILE ####\n", meta);
-	console.log("#### POSTS ####\n", posts);
-
 	const totalLikes = posts.reduce((s, p) => s + p.likes, 0);
 	const totalComments = posts.reduce((s, p) => s + p.comments, 0);
 	const averageLikes = posts.length > 0 ? totalLikes / posts.length : 0;
@@ -328,8 +325,6 @@ export const scrapeService = {
 				"PARSE_ERROR",
 			);
 		}
-
-		console.log("#### PROFILE PARSED ####\n", parsed);
 
 		// Upsert cache entry
 		const now = new Date();

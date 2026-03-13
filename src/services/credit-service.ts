@@ -171,7 +171,6 @@ export async function createPixPayment(
 		};
 	} catch (error) {
 		if (error instanceof CreditServiceError) throw error;
-		console.error("Mercado Pago SDK error:", error);
 		throw new CreditServiceError(
 			"Failed to create Pix payment. Please try again.",
 			"PAYMENT_ERROR",

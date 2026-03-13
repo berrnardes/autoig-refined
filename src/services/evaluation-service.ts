@@ -131,8 +131,6 @@ export const evaluationService = {
 					competitors,
 					{ resultsLimit: 5 },
 				);
-
-				console.log(competitorData);
 			} catch (err) {
 				throw new EvaluationServiceError(
 					`Failed to analyze competitors: ${err instanceof Error ? err.message : String(err)}`,
