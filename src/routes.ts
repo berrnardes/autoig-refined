@@ -7,7 +7,7 @@ export const publicRoutes = ["/"];
  * Routes used for authentication (login, signup).
  * Logged-in users hitting these get redirected to the dashboard.
  */
-export const authRoutes = ["/login"];
+export const authRoutes = ["/login", "/register"];
 
 /**
  * Prefix for the auth API routes.

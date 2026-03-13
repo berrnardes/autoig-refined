@@ -204,6 +204,7 @@ export default function EvaluatePage() {
 		message: string;
 		field?: "username" | "competitors";
 	} | null>(null);
+	const [confirmed, setConfirmed] = useState(false);
 
 	const { data: balance, isLoading: creditsLoading } = useCredits();
 	const createEvaluation = useCreateEvaluation();
@@ -408,6 +409,18 @@ export default function EvaluatePage() {
 								))}
 							</ul>
 						</div>
+						<label className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 cursor-pointer dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200">
+							<input
+								type="checkbox"
+								checked={confirmed}
+								onChange={(e) => setConfirmed(e.target.checked)}
+								className="mt-0.5 accent-amber-600"
+							/>
+							<span>
+								Confirmo que todos os perfis existem e são públicos. Perfis
+								privados ou inexistentes não podem ser analisados.
+							</span>
+						</label>
 						<div className="flex items-center justify-between border-t border-border pt-3">
 							<span className="text-xs text-muted-foreground">Custo</span>
 							<span className="font-medium">1 crédito</span>
@@ -429,7 +442,7 @@ export default function EvaluatePage() {
 						{hasCredits ? (
 							<Button
 								onClick={handleSubmit}
-								disabled={createEvaluation.isPending}
+								disabled={createEvaluation.isPending || !confirmed}
 							>
 								Iniciar avaliação
 							</Button>

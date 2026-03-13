@@ -11,13 +11,14 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signIn } from "@/lib/auth/client";
+import { signUp } from "@/lib/auth/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-export default function LoginPage() {
+export default function RegisterPage() {
 	const router = useRouter();
+	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
@@ -29,18 +30,19 @@ export default function LoginPage() {
 		setLoading(true);
 
 		try {
-			const { error: signInError } = await signIn.email(
-				{ email, password },
+			const { error: signUpError } = await signUp.email(
+				{ email, password, name },
 				{
 					onSuccess: () => router.push("/dashboard"),
-					onError: () => setError("Credenciais inválidas. Tente novamente."),
+					onError: () =>
+						setError("Não foi possível criar a conta. Tente novamente."),
 				},
 			);
-			if (signInError) {
-				setError("Credenciais inválidas. Tente novamente.");
+			if (signUpError) {
+				setError("Não foi possível criar a conta. Tente novamente.");
 			}
 		} catch {
-			setError("Credenciais inválidas. Tente novamente.");
+			setError("Não foi possível criar a conta. Tente novamente.");
 		} finally {
 			setLoading(false);
 		}
@@ -50,13 +52,22 @@ export default function LoginPage() {
 		<div className="flex min-h-screen items-center justify-center p-4">
 			<Card className="w-full max-w-sm">
 				<CardHeader>
-					<CardTitle>Entrar</CardTitle>
-					<CardDescription>
-						Insira suas credenciais para continuar
-					</CardDescription>
+					<CardTitle>Criar conta</CardTitle>
+					<CardDescription>Preencha seus dados para começar</CardDescription>
 				</CardHeader>
 				<form onSubmit={handleSubmit}>
 					<CardContent className="flex flex-col gap-4">
+						<div className="flex flex-col gap-2">
+							<Label htmlFor="name">Nome</Label>
+							<Input
+								id="name"
+								type="text"
+								placeholder="Seu nome"
+								value={name}
+								onChange={(e) => setName(e.target.value)}
+								required
+							/>
+						</div>
 						<div className="flex flex-col gap-2">
 							<Label htmlFor="email">Email</Label>
 							<Input
@@ -88,13 +99,13 @@ export default function LoginPage() {
 					</CardContent>
 					<CardFooter className="flex flex-col gap-3 mt-4">
 						<Button type="submit" className="w-full" disabled={loading}>
-							{loading ? "Entrando..." : "Entrar"}
+							{loading ? "Criando..." : "Criar conta"}
 						</Button>
 						<Link
-							href="/register"
+							href="/login"
 							className="text-sm text-muted-foreground hover:text-foreground"
 						>
-							Não tem uma conta? Cadastre-se
+							Já tem uma conta? Entrar
 						</Link>
 					</CardFooter>
 				</form>

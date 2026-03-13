@@ -1,5 +1,5 @@
 {
-  "id": "7a031be2-c006-4fb1-bcab-d817c1b22ba5",
+  "id": "b9f9b5f5-b8c8-4469-8c50-747dcab83d0b",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -47,7 +47,23 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "credit_transactions_reference_id_idx": {
+          "name": "credit_transactions_reference_id_idx",
+          "columns": [
+            {
+              "expression": "reference_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -87,7 +103,23 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "credits_user_id_idx": {
+          "name": "credits_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
@@ -158,7 +190,23 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "evaluations_user_id_idx": {
+          "name": "evaluations_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},

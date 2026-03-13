@@ -252,7 +252,7 @@ export default function Home() {
 				<p className="text-lg text-muted-foreground mb-8">
 					Comece agora com 1 crédito gratuito
 				</p>
-				<Link href="/login">
+				<Link href="/register">
 					<Button size="lg">Criar conta grátis</Button>
 				</Link>
 			</section>
