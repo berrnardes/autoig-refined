@@ -61,7 +61,7 @@ export default function Home() {
 			</header>
 
 			{/* Hero Section */}
-			<section className="mx-auto max-w-6xl px-4 py-16 sm:py-24">
+			<section className="mx-auto max-w-6xl px-4 py-8 sm:py-10">
 				<div className="grid lg:grid-cols-2 gap-12 items-center">
 					<div className="space-y-6">
 						<h2 className="text-4xl sm:text-5xl font-bold leading-tight tracking-tight">
@@ -261,6 +261,16 @@ export default function Home() {
 			<footer className="border-t border-border py-8">
 				<div className="mx-auto max-w-6xl px-4 text-center text-sm text-muted-foreground">
 					<p>© 2026 AutoIG. Todos os direitos reservados.</p>
+					<p>
+						Desenvolvido por{" "}
+						<Link
+							className="text-blue-600 underline"
+							target="_blank"
+							href={"https://www.dalio.io"}
+						>
+							dalio.io
+						</Link>
+					</p>
 				</div>
 			</footer>
 		</div>

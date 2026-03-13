@@ -13,7 +13,110 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateEvaluation, useCredits } from "@/lib/hooks";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+const LOADING_STEPS = [
+	{ label: "Coletando dados do perfil", duration: 4000 },
+	{ label: "Analisando concorrentes", duration: 6000 },
+	{ label: "Processando métricas", duration: 4000 },
+	{ label: "Gerando guia com IA", duration: 8000 },
+	{ label: "Avaliando qualidade", duration: 5000 },
+	{ label: "Finalizando relatório", duration: 3000 },
+];
+
+function EvaluationLoader({ username }: { username: string }) {
+	const [currentStep, setCurrentStep] = useState(0);
+	const [progress, setProgress] = useState(0);
+
+	useEffect(() => {
+		let stepIndex = 0;
+		let elapsed = 0;
+		const totalDuration = LOADING_STEPS.reduce((s, x) => s + x.duration, 0);
+
+		const interval = setInterval(() => {
+			elapsed += 100;
+			setProgress(Math.min((elapsed / totalDuration) * 100, 95));
+
+			let acc = 0;
+			for (let i = 0; i < LOADING_STEPS.length; i++) {
+				acc += LOADING_STEPS[i].duration;
+				if (elapsed < acc) {
+					stepIndex = i;
+					break;
+				}
+				stepIndex = LOADING_STEPS.length - 1;
+			}
+			setCurrentStep(stepIndex);
+		}, 100);
+
+		return () => clearInterval(interval);
+	}, []);
+
+	return (
+		<div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background px-6">
+			<div className="w-full max-w-sm flex flex-col items-center gap-8">
+				{/* Spinner */}
+				<div className="relative flex items-center justify-center">
+					<div className="h-16 w-16 rounded-full border-4 border-muted" />
+					<div className="absolute h-16 w-16 rounded-full border-4 border-transparent border-t-primary animate-spin" />
+				</div>
+
+				{/* Title */}
+				<div className="text-center">
+					<p className="text-sm text-muted-foreground mb-1">Avaliando</p>
+					<p className="font-semibold text-lg">@{username}</p>
+				</div>
+
+				{/* Steps */}
+				<div className="w-full flex flex-col gap-2">
+					{LOADING_STEPS.map((step, i) => {
+						const done = i < currentStep;
+						const active = i === currentStep;
+						return (
+							<div key={step.label} className="flex items-center gap-3">
+								<div
+									className={`h-1.5 w-1.5 rounded-full shrink-0 transition-colors duration-300 ${
+										done
+											? "bg-primary"
+											: active
+												? "bg-primary animate-pulse"
+												: "bg-muted"
+									}`}
+								/>
+								<span
+									className={`text-sm transition-colors duration-300 ${
+										done
+											? "text-muted-foreground line-through"
+											: active
+												? "text-foreground font-medium"
+												: "text-muted-foreground/50"
+									}`}
+								>
+									{step.label}
+								</span>
+								{done && (
+									<span className="ml-auto text-xs text-primary">✓</span>
+								)}
+							</div>
+						);
+					})}
+				</div>
+
+				{/* Progress bar */}
+				<div className="w-full h-1 bg-muted rounded-full overflow-hidden">
+					<div
+						className="h-full bg-primary rounded-full transition-all duration-100 ease-linear"
+						style={{ width: `${progress}%` }}
+					/>
+				</div>
+
+				<p className="text-xs text-muted-foreground text-center">
+					Isso pode levar alguns minutos. Não feche esta página.
+				</p>
+			</div>
+		</div>
+	);
+}
 
 const USERNAME_REGEX = /^[a-zA-Z0-9._]+$/;
 
@@ -89,7 +192,7 @@ export default function EvaluatePage() {
 	}
 
 	function addCompetitor() {
-		if (competitors.length < 5) setCompetitors([...competitors, ""]);
+		if (competitors.length < 3) setCompetitors([...competitors, ""]);
 	}
 
 	function removeCompetitor(index: number) {
@@ -109,6 +212,7 @@ export default function EvaluatePage() {
 
 	return (
 		<div className="mx-auto max-w-lg px-4 py-8 sm:py-12">
+			{createEvaluation.isPending && <EvaluationLoader username={username} />}
 			<Link
 				href="/dashboard"
 				className="text-xs text-muted-foreground hover:text-foreground mb-4 inline-block"
@@ -156,7 +260,7 @@ export default function EvaluatePage() {
 					<CardHeader>
 						<CardTitle>Concorrentes</CardTitle>
 						<CardDescription>
-							Adicione de 1 a 5 perfis concorrentes
+							Adicione de 1 a 3 perfis concorrentes
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="flex flex-col gap-3">
@@ -190,7 +294,7 @@ export default function EvaluatePage() {
 								)}
 							</div>
 						))}
-						{competitors.length < 5 && (
+						{competitors.length < 3 && (
 							<Button
 								variant="outline"
 								size="sm"
@@ -257,9 +361,7 @@ export default function EvaluatePage() {
 								onClick={handleSubmit}
 								disabled={createEvaluation.isPending}
 							>
-								{createEvaluation.isPending
-									? "Iniciando…"
-									: "Iniciar avaliação"}
+								Iniciar avaliação
 							</Button>
 						) : (
 							<Link href="/dashboard">

@@ -111,7 +111,11 @@ export const evaluationService = {
 			await updateStatus(evalId, "scraping");
 			let profileData: ProfileData;
 			try {
-				profileData = await scrapeService.scrapeProfile(username);
+				profileData = await scrapeService.scrapeProfile(username, false, {
+					addParentData: false,
+					resultsType: "details",
+					resultsLimit: 10,
+				});
 			} catch (err) {
 				throw new EvaluationServiceError(
 					`Failed to scrape profile "${username}": ${err instanceof Error ? err.message : String(err)}`,
@@ -123,8 +127,12 @@ export const evaluationService = {
 			await updateStatus(evalId, "analyzing");
 			let competitorData: CompetitorData;
 			try {
-				competitorData =
-					await competitorService.analyzeCompetitors(competitors);
+				competitorData = await competitorService.analyzeCompetitors(
+					competitors,
+					{ resultsLimit: 5 },
+				);
+
+				console.log(competitorData);
 			} catch (err) {
 				throw new EvaluationServiceError(
 					`Failed to analyze competitors: ${err instanceof Error ? err.message : String(err)}`,

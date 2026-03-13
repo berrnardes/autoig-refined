@@ -64,7 +64,7 @@ async function callApify(
 			directUrls: [`https://www.instagram.com/${username}/`],
 			resultsType: options.resultsType,
 			resultsLimit: options.resultsLimit,
-			searchType: "profiles",
+			searchType: "user",
 			searchLimit: 1,
 			addParentData: options.addParentData,
 		});
@@ -135,31 +135,55 @@ function extractProfileMeta(
 }
 
 /**
- * Normalizes raw Apify instagram-scraper post items into our PostData shape.
+ * Normalizes a single raw post item into our PostData shape.
  */
-function normalizePosts(items: Record<string, unknown>[]): PostData[] {
-	return items.map((item) => {
-		const caption = (item.caption ?? "") as string;
-		const hashtags =
-			(item.hashtags as string[] | undefined) ??
-			(caption.match(/#[\w]+/g) ?? []).map((h: string) => h.replace("#", ""));
+function normalizePost(item: Record<string, unknown>): PostData {
+	const caption = (item.caption ?? "") as string;
+	const hashtags =
+		(item.hashtags as string[] | undefined) ??
+		(caption.match(/#[\w]+/g) ?? []).map((h: string) => h.replace("#", ""));
 
-		return {
-			postId: String(item.id ?? ""),
-			shortCode: (item.shortCode ?? "") as string,
-			caption,
-			likes: (item.likesCount ?? 0) as number,
-			comments: (item.commentsCount ?? 0) as number,
-			hashtags,
-			timestamp: (item.timestamp ?? new Date().toISOString()) as string,
-			type:
-				item.type === "Video"
-					? "video"
-					: item.type === "Sidecar"
-						? "carousel"
-						: "image",
-		} satisfies PostData;
-	});
+	return {
+		postId: String(item.id ?? ""),
+		shortCode: (item.shortCode ?? "") as string,
+		caption,
+		likes: (item.likesCount ?? 0) as number,
+		comments: (item.commentsCount ?? 0) as number,
+		hashtags,
+		timestamp: (item.timestamp ?? new Date().toISOString()) as string,
+		type:
+			item.type === "Video"
+				? "video"
+				: item.type === "Sidecar"
+					? "carousel"
+					: "image",
+	} satisfies PostData;
+}
+
+/**
+ * Extracts post items from Apify results.
+ * - "posts" resultsType: each item IS a post (with addParentData profile fields on top)
+ * - "details" resultsType: single item with latestPosts[] nested inside
+ * Pinned posts are excluded to keep engagement rate calculations consistent.
+ */
+function extractPosts(items: Record<string, unknown>[]): PostData[] {
+	if (items.length === 0) return [];
+
+	const isNotPinned = (item: Record<string, unknown>) => !item.isPinned;
+
+	// "details" mode: single profile object with latestPosts array
+	const first = items[0];
+	if (Array.isArray(first.latestPosts) && first.latestPosts.length > 0) {
+		return (first.latestPosts as Record<string, unknown>[])
+			.filter(isNotPinned)
+			.map(normalizePost);
+	}
+
+	// "posts" mode: each item is a post
+	return items
+		.filter((item) => item.shortCode || item.id)
+		.filter(isNotPinned)
+		.map(normalizePost);
 }
 
 /**
@@ -170,7 +194,10 @@ function buildProfileData(
 	items: Record<string, unknown>[],
 ): ProfileData {
 	const meta = extractProfileMeta(username, items);
-	const posts = normalizePosts(items);
+	const posts = extractPosts(items);
+
+	console.log("##### META PROFILE ####\n", meta);
+	console.log("#### POSTS ####\n", posts);
 
 	const totalLikes = posts.reduce((s, p) => s + p.likes, 0);
 	const totalComments = posts.reduce((s, p) => s + p.comments, 0);
@@ -293,6 +320,8 @@ export const scrapeService = {
 				"PARSE_ERROR",
 			);
 		}
+
+		console.log("#### PROFILE PARSED ####\n", parsed);
 
 		// Upsert cache entry
 		const now = new Date();
