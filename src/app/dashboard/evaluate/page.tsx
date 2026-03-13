@@ -277,6 +277,11 @@ export default function EvaluatePage() {
 		);
 	}
 
+	// Show the loading screen while the pipeline runs
+	if (createEvaluation.isPending) {
+		return <EvaluationLoader username={username} />;
+	}
+
 	return (
 		<div className="mx-auto max-w-lg px-4 py-8 sm:py-12">
 			<Link

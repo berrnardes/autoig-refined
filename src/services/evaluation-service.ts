@@ -13,6 +13,7 @@ import type {
 	GuideContent,
 	ProfileData,
 } from "@/types";
+import * as Sentry from "@sentry/nextjs";
 import { desc, eq } from "drizzle-orm";
 import { competitorService } from "./competitor-service";
 import {
@@ -202,6 +203,12 @@ export const evaluationService = {
 				qualityScore: judgeResult.score,
 			});
 		} catch (err) {
+			// Capture the pipeline failure in Sentry so it's not silent
+			Sentry.captureException(err, {
+				tags: { service: "evaluation-pipeline" },
+				extra: { evalId, userId, username, competitors },
+			});
+
 			// Refund credit on any pipeline failure
 			try {
 				await refundCredit(userId);

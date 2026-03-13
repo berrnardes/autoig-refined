@@ -6,7 +6,7 @@ import {
 	EvaluationServiceError,
 } from "@/services/evaluation-service";
 import { headers } from "next/headers";
-import { after, NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
 	const session = await auth.api.getSession({
@@ -42,19 +42,19 @@ export async function POST(request: NextRequest) {
 			parsed.data.competitors,
 		);
 
-		// Schedule the heavy pipeline via after() so the serverless runtime
-		// keeps the function alive until it completes, instead of killing it
-		// right after the 202 response is sent.
-		after(
-			evaluationService.runPipeline(
-				evaluation.id,
-				session.user.id,
-				parsed.data.username,
-				parsed.data.competitors,
-			),
+		// Run the full pipeline before responding. This makes the request
+		// take longer, but guarantees the work completes — fire-and-forget
+		// promises get killed by the Next.js runtime after the response is sent.
+		await evaluationService.runPipeline(
+			evaluation.id,
+			session.user.id,
+			parsed.data.username,
+			parsed.data.competitors,
 		);
 
-		return NextResponse.json(evaluation, { status: 202 });
+		// Re-fetch the evaluation to get the final state after pipeline completion
+		const completed = await evaluationService.getEvaluation(evaluation.id);
+		return NextResponse.json(completed, { status: 200 });
 	} catch (err) {
 		if (err instanceof EvaluationServiceError) {
 			if (err.code === "INSUFFICIENT_CREDITS") {
