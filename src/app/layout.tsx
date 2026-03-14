@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, JetBrains_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const jetbrainsMono = JetBrains_Mono({
@@ -84,6 +85,21 @@ export default function RootLayout({
 				<ThemeProvider>
 					<QueryProvider>{children}</QueryProvider>
 				</ThemeProvider>
+				<Script
+					async
+					src="https://www.googletagmanager.com/gtag/js?id=G-H254XDCQ0H"
+				/>
+				<Script
+					id="google-analytics"
+					dangerouslySetInnerHTML={{
+						__html: `
+							window.dataLayer = window.dataLayer || [];
+							function gtag(){dataLayer.push(arguments);}
+							gtag('js', new Date());
+							gtag('config', 'G-H254XDCQ0H');
+						`,
+					}}
+				/>
 			</body>
 		</html>
 	);
