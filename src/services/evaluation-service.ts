@@ -209,6 +209,11 @@ export const evaluationService = {
 				extra: { evalId, userId, username, competitors },
 			});
 
+			console.error(
+				`[evaluation-pipeline] Failed for eval=${evalId} user=${username}:`,
+				err,
+			);
+
 			// Refund credit on any pipeline failure
 			try {
 				await refundCredit(userId);
