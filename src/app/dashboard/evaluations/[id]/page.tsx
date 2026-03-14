@@ -196,9 +196,12 @@ function GuideDisplay({
 }) {
 	return (
 		<div className="flex flex-col gap-4">
-			<Button onClick={onDownload} className="self-start">
-				Baixar PDF
-			</Button>
+			<div className="flex items-center justify-between">
+				<p>Diagnóstico completo em PDF:</p>
+				<Button onClick={onDownload} className="self-start">
+					Baixar
+				</Button>
+			</div>
 			<Card>
 				<CardHeader>
 					<CardTitle>Resumo</CardTitle>

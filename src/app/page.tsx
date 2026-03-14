@@ -79,7 +79,7 @@ export default function Home() {
 								onChange={(e) => setUsername(e.target.value)}
 								className="flex-1"
 							/>
-							<Link href={username ? "/dashboard/evaluate" : "/login"}>
+							<Link href={username ? "/dashboard/evaluate" : "/register"}>
 								<Button>Analisar</Button>
 							</Link>
 						</div>

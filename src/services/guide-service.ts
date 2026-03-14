@@ -136,10 +136,13 @@ function buildTemplateVars(
 	};
 }
 
-function createModel() {
+function createGuideModel() {
 	return new ChatOpenAI({
-		model: "gpt-4.1-mini",
-		temperature: 0.7,
+		model: "anthropic/claude-opus-4.6",
+		configuration: {
+			baseURL: "https://openrouter.ai/api/v1",
+			apiKey: process.env.OPENAI_API_KEY,
+		},
 	});
 }
 
@@ -147,7 +150,7 @@ export async function generateGuide(
 	profile: ProfileData,
 	competitors: CompetitorData,
 ): Promise<GuideContent> {
-	const model = createModel();
+	const model = createGuideModel();
 	const structuredModel = model.withStructuredOutput(guideContentSchema, {
 		name: "guide_content",
 		strict: true,
@@ -192,7 +195,7 @@ export async function regenerateGuide(
 	competitors: CompetitorData,
 	feedback: string,
 ): Promise<GuideContent> {
-	const model = createModel();
+	const model = createGuideModel();
 	const structuredModel = model.withStructuredOutput(guideContentSchema, {
 		name: "guide_content",
 		strict: true,

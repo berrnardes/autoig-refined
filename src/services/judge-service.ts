@@ -72,8 +72,11 @@ function formatGuideForJudging(guide: GuideContent): Record<string, string> {
 
 function createJudgeModel() {
 	return new ChatOpenAI({
-		model: "gpt-4.1-mini",
-		temperature: 0.3,
+		model: "openai/o4-mini",
+		configuration: {
+			baseURL: "https://openrouter.ai/api/v1",
+			apiKey: process.env.OPENAI_API_KEY,
+		},
 	});
 }
 
