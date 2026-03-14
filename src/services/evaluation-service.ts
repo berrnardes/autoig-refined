@@ -150,7 +150,7 @@ export const evaluationService = {
 			try {
 				competitorData = await competitorService.analyzeCompetitors(
 					competitors,
-					{ resultsLimit: 5 },
+					{ addParentData: false, resultsType: "details", resultsLimit: 10 },
 				);
 			} catch (err) {
 				throw new EvaluationServiceError(

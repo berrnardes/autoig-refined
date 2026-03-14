@@ -95,6 +95,7 @@ export const competitorService = {
 
 		const competitors: CompetitorData["competitors"] = [];
 		const failedUsernames: string[] = [];
+		const failureReasons: string[] = [];
 
 		results.forEach((result, i) => {
 			if (result.status === "fulfilled") {
@@ -104,12 +105,22 @@ export const competitorService = {
 				});
 			} else {
 				failedUsernames.push(usernames[i]);
+				const reason =
+					result.reason instanceof Error
+						? result.reason.message
+						: String(result.reason);
+				failureReasons.push(`@${usernames[i]}: ${reason}`);
+				console.error(
+					`[competitor-service] Failed to scrape @${usernames[i]}:`,
+					result.reason,
+				);
 			}
 		});
 
 		if (competitors.length === 0) {
+			const reasonsSummary = failureReasons.join(" | ");
 			throw new CompetitorServiceError(
-				"All competitor profiles failed to scrape",
+				`All competitor profiles failed to scrape (${failedUsernames.length}/${usernames.length}). Reasons: ${reasonsSummary}`,
 				"SCRAPE_ERROR",
 			);
 		}
