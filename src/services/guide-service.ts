@@ -1,7 +1,7 @@
 import { guideContentSchema } from "@/lib/validators";
 import type { CompetitorData, GuideContent, ProfileData } from "@/types";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatOpenRouter } from "@langchain/openrouter";
 
 const SYSTEM_PROMPT = `You are an expert Instagram marketing consultant specializing in the Brazilian market.
 You analyze Instagram profiles and compare them against competitors to produce actionable optimization guides.
@@ -137,12 +137,10 @@ function buildTemplateVars(
 }
 
 function createGuideModel() {
-	return new ChatOpenAI({
-		model: "anthropic/claude-opus-4.6",
-		configuration: {
-			baseURL: "https://openrouter.ai/api/v1",
-			apiKey: process.env.OPENAI_API_KEY,
-		},
+	return new ChatOpenRouter({
+		model: "anthropic/claude-sonnet-4",
+		temperature: 0.7,
+		apiKey: process.env.OPENROUTER_API_KEY,
 	});
 }
 
@@ -153,7 +151,6 @@ export async function generateGuide(
 	const model = createGuideModel();
 	const structuredModel = model.withStructuredOutput(guideContentSchema, {
 		name: "guide_content",
-		strict: true,
 	});
 
 	const prompt = ChatPromptTemplate.fromMessages([
@@ -198,7 +195,6 @@ export async function regenerateGuide(
 	const model = createGuideModel();
 	const structuredModel = model.withStructuredOutput(guideContentSchema, {
 		name: "guide_content",
-		strict: true,
 	});
 
 	const prompt = ChatPromptTemplate.fromMessages([

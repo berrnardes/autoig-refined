@@ -1,7 +1,7 @@
 import { judgeScoreSchema } from "@/lib/validators";
 import type { GuideContent } from "@/types";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { ChatOpenAI } from "@langchain/openai";
+import { ChatOpenRouter } from "@langchain/openrouter";
 
 const JUDGE_SYSTEM_PROMPT = `You are an independent quality evaluator for Instagram profile optimization guides.
 Your role is to objectively assess guides on three dimensions:
@@ -71,12 +71,9 @@ function formatGuideForJudging(guide: GuideContent): Record<string, string> {
 }
 
 function createJudgeModel() {
-	return new ChatOpenAI({
+	return new ChatOpenRouter({
 		model: "openai/o4-mini",
-		configuration: {
-			baseURL: "https://openrouter.ai/api/v1",
-			apiKey: process.env.OPENAI_API_KEY,
-		},
+		apiKey: process.env.OPENROUTER_API_KEY,
 	});
 }
 
