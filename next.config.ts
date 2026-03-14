@@ -31,6 +31,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+	skipTrailingSlashRedirect: true,
 	async headers() {
 		return [{ source: "/(.*)", headers: securityHeaders }];
 	},
