@@ -63,9 +63,14 @@ export async function POST(request: NextRequest) {
 					{ status: 402 },
 				);
 			}
+			const status = err.code === "SCRAPE_FAILED" ? 422 : 500;
 			return NextResponse.json(
-				{ error: err.message, code: err.code },
-				{ status: 500 },
+				{
+					error: err.message,
+					code: err.code,
+					...(err.failedProfiles && { failedProfiles: err.failedProfiles }),
+				},
+				{ status },
 			);
 		}
 		return NextResponse.json(

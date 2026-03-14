@@ -22,7 +22,7 @@ import {
 } from "./credit-service";
 import * as guideService from "./guide-service";
 import * as judgeService from "./judge-service";
-import { scrapeService } from "./scrape-service";
+import { scrapeService, ScrapeServiceError } from "./scrape-service";
 
 const REGENERATION_THRESHOLD = 60;
 
@@ -36,6 +36,10 @@ export class EvaluationServiceError extends Error {
 			| "JUDGE_FAILED"
 			| "NOT_FOUND"
 			| "INTERNAL_ERROR",
+		public readonly failedProfiles?: Array<{
+			username: string;
+			reason: "INVALID_USERNAME" | "PRIVATE_PROFILE" | "UNKNOWN";
+		}>,
 	) {
 		super(message);
 		this.name = "EvaluationServiceError";
@@ -137,9 +141,14 @@ export const evaluationService = {
 					resultsLimit: 10,
 				});
 			} catch (err) {
+				const reason =
+					err instanceof ScrapeServiceError
+						? (err.code as "INVALID_USERNAME" | "PRIVATE_PROFILE" | "UNKNOWN")
+						: "UNKNOWN";
 				throw new EvaluationServiceError(
 					`Failed to scrape profile "${username}": ${err instanceof Error ? err.message : String(err)}`,
 					"SCRAPE_FAILED",
+					[{ username, reason }],
 				);
 			}
 
@@ -155,6 +164,14 @@ export const evaluationService = {
 				throw new EvaluationServiceError(
 					`Failed to analyze competitors: ${err instanceof Error ? err.message : String(err)}`,
 					"SCRAPE_FAILED",
+					competitors.map((u) => ({ username: u, reason: "UNKNOWN" as const })),
+				);
+			}
+
+			// Surface partial failures from competitor scraping
+			if (competitorData.failedUsernames.length > 0) {
+				console.warn(
+					`[evaluation-pipeline] Partial competitor failures for eval=${evalId}: ${competitorData.failedUsernames.join(", ")}`,
 				);
 			}
 
@@ -215,6 +232,15 @@ export const evaluationService = {
 			}
 
 			await updateStatus(evalId, "failed");
+
+			// Re-throw so the API route can return structured error details
+			if (err instanceof EvaluationServiceError) {
+				throw err;
+			}
+			throw new EvaluationServiceError(
+				`Pipeline failed: ${err instanceof Error ? err.message : String(err)}`,
+				"INTERNAL_ERROR",
+			);
 		}
 	},
 

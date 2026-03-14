@@ -146,18 +146,68 @@ function StepIndicator({ step }: { step: number }) {
 	);
 }
 
-function getSubmitErrorMessage(err: unknown): {
+interface FailedProfile {
+	username: string;
+	reason: "INVALID_USERNAME" | "PRIVATE_PROFILE" | "UNKNOWN";
+}
+
+interface SubmitError {
 	message: string;
 	field?: "username" | "competitors";
-} {
+	failedProfiles?: FailedProfile[];
+}
+
+const PROFILE_ERROR_LABELS: Record<FailedProfile["reason"], string> = {
+	INVALID_USERNAME: "não encontrado",
+	PRIVATE_PROFILE: "perfil privado",
+	UNKNOWN: "erro ao acessar",
+};
+
+function getSubmitErrorMessage(err: unknown): SubmitError {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const data = (err as any)?.response?.data;
+	const failedProfiles: FailedProfile[] | undefined = data?.failedProfiles;
+	const code: string | undefined = data?.code;
 	const raw: string =
 		data?.error ??
 		(err instanceof Error
 			? err.message
 			: "Erro ao criar avaliação. Tente novamente.");
 
+	if (
+		code === "INSUFFICIENT_CREDITS" ||
+		raw.includes("crédito") ||
+		raw.includes("credit")
+	) {
+		return { message: "Créditos insuficientes para realizar a avaliação." };
+	}
+
+	// Structured failedProfiles from the API — use them for precise messages
+	if (failedProfiles?.length) {
+		const labels = failedProfiles
+			.map((p) => `@${p.username} (${PROFILE_ERROR_LABELS[p.reason]})`)
+			.join(", ");
+
+		// Determine if the failure is on the user's profile or competitors
+		const isUserProfile =
+			code === "SCRAPE_FAILED" && raw.includes("scrape profile");
+		if (isUserProfile) {
+			const reason = failedProfiles[0].reason;
+			const message =
+				reason === "PRIVATE_PROFILE"
+					? "Seu perfil é privado e não pode ser analisado."
+					: "Perfil não encontrado. Verifique o nome de usuário.";
+			return { message, field: "username", failedProfiles };
+		}
+
+		return {
+			message: `Não foi possível acessar: ${labels}`,
+			field: "competitors",
+			failedProfiles,
+		};
+	}
+
+	// Fallback: string-based detection for backwards compatibility
 	if (raw.includes("private") || raw.includes("privado")) {
 		return {
 			message: "Este perfil é privado e não pode ser analisado.",
@@ -185,13 +235,6 @@ function getSubmitErrorMessage(err: unknown): {
 			field: "competitors",
 		};
 	}
-	if (
-		raw.includes("INSUFFICIENT_CREDITS") ||
-		raw.includes("crédito") ||
-		raw.includes("credit")
-	) {
-		return { message: "Créditos insuficientes para realizar a avaliação." };
-	}
 	return { message: "Erro ao criar avaliação. Tente novamente." };
 }
 
@@ -200,10 +243,7 @@ export default function EvaluatePage() {
 	const [username, setUsername] = useState("");
 	const [competitors, setCompetitors] = useState([""]);
 	const [errors, setErrors] = useState<Record<string, string>>({});
-	const [submitError, setSubmitError] = useState<{
-		message: string;
-		field?: "username" | "competitors";
-	} | null>(null);
+	const [submitError, setSubmitError] = useState<SubmitError | null>(null);
 	const [confirmed, setConfirmed] = useState(false);
 
 	const { data: balance, isLoading: creditsLoading } = useCredits();
@@ -340,36 +380,48 @@ export default function EvaluatePage() {
 						</CardDescription>
 					</CardHeader>
 					<CardContent className="flex flex-col gap-3">
-						{competitors.map((c, i) => (
-							<div key={i} className="flex flex-col gap-1">
-								<div className="flex items-center gap-2">
-									<span className="flex h-8 items-center border border-r-0 border-input bg-muted px-2 text-xs text-muted-foreground">
-										@
-									</span>
-									<Input
-										placeholder="concorrente"
-										value={c}
-										onChange={(e) => updateCompetitor(i, e.target.value)}
-										aria-invalid={!!errors[`competitor_${i}`]}
-									/>
-									{competitors.length > 1 && (
-										<Button
-											variant="ghost"
-											size="icon-xs"
-											onClick={() => removeCompetitor(i)}
-											aria-label="Remover concorrente"
-										>
-											✕
-										</Button>
+						{competitors.map((c, i) => {
+							const failed = submitError?.failedProfiles?.find(
+								(fp) =>
+									fp.username.toLowerCase().replace(/^@/, "") ===
+									c.toLowerCase().replace(/^@/, ""),
+							);
+							return (
+								<div key={i} className="flex flex-col gap-1">
+									<div className="flex items-center gap-2">
+										<span className="flex h-8 items-center border border-r-0 border-input bg-muted px-2 text-xs text-muted-foreground">
+											@
+										</span>
+										<Input
+											placeholder="concorrente"
+											value={c}
+											onChange={(e) => updateCompetitor(i, e.target.value)}
+											aria-invalid={!!errors[`competitor_${i}`] || !!failed}
+										/>
+										{competitors.length > 1 && (
+											<Button
+												variant="ghost"
+												size="icon-xs"
+												onClick={() => removeCompetitor(i)}
+												aria-label="Remover concorrente"
+											>
+												✕
+											</Button>
+										)}
+									</div>
+									{/* 									{errors[`competitor_${i}`] && (
+										<p className="text-xs text-destructive">
+											{errors[`competitor_${i}`]}
+										</p>
+									)} */}
+									{failed && (
+										<p className="text-xs text-destructive">
+											{PROFILE_ERROR_LABELS[failed.reason]}
+										</p>
 									)}
 								</div>
-								{errors[`competitor_${i}`] && (
-									<p className="text-xs text-destructive">
-										{errors[`competitor_${i}`]}
-									</p>
-								)}
-							</div>
-						))}
+							);
+						})}
 						{competitors.length < 3 && (
 							<Button
 								variant="outline"
