@@ -2,12 +2,13 @@ import { db } from "@/db";
 import { scrapeCache } from "@/db/schema";
 import { profileDataSchema } from "@/lib/validators";
 import type { PostData, ProfileData } from "@/types";
-import { ApifyClient } from "apify-client";
+import axios from "axios";
 import { eq } from "drizzle-orm";
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 const ACTOR_ID = "shu8hvrXbJbY3Eb9W"; // apify/instagram-scraper
+const APIFY_BASE_URL = "https://api.apify.com/v2";
 
 export interface ScrapeOptions {
 	/** "posts" to get post data, "details" to get profile metadata only */
@@ -39,7 +40,7 @@ export class ScrapeServiceError extends Error {
 	}
 }
 
-function getApifyClient(): ApifyClient {
+function getApifyToken(): string {
 	const token = process.env.APIFY_API_TOKEN;
 	if (!token) {
 		throw new ScrapeServiceError(
@@ -47,31 +48,46 @@ function getApifyClient(): ApifyClient {
 			"APIFY_ERROR",
 		);
 	}
-	return new ApifyClient({ token });
+	return token;
 }
 
 /**
- * Calls the apify/instagram-scraper actor (shu8hvrXbJbY3Eb9W) via the SDK.
- * Uses directUrls for precise targeting and exposes resultsType/resultsLimit.
+ * Calls the apify/instagram-scraper actor via the REST API directly,
+ * bypassing apify-client (which has a proxy-agent dependency that breaks
+ * in Vercel's serverless bundler).
  */
 async function callApify(
 	username: string,
 	options: Required<ScrapeOptions>,
 ): Promise<Record<string, unknown>[]> {
-	const client = getApifyClient();
+	const token = getApifyToken();
 
 	try {
-		const run = await client.actor(ACTOR_ID).call({
-			directUrls: [`https://www.instagram.com/${username}/`],
-			resultsType: options.resultsType,
-			resultsLimit: options.resultsLimit,
-			searchType: "user",
-			searchLimit: 1,
-			addParentData: options.addParentData,
-		});
+		// Start the actor run and wait for it to finish
+		const runResponse = await axios.post<{
+			data: { defaultDatasetId: string };
+		}>(
+			`${APIFY_BASE_URL}/acts/${ACTOR_ID}/runs?token=${token}&waitForFinish=300`,
+			{
+				directUrls: [`https://www.instagram.com/${username}/`],
+				resultsType: options.resultsType,
+				resultsLimit: options.resultsLimit,
+				searchType: "user",
+				searchLimit: 1,
+				addParentData: options.addParentData,
+			},
+			{ headers: { "Content-Type": "application/json" }, timeout: 320_000 },
+		);
 
-		const { items } = await client.dataset(run.defaultDatasetId).listItems();
-		return items as Record<string, unknown>[];
+		const datasetId = runResponse.data.data.defaultDatasetId;
+
+		// Fetch dataset items
+		const datasetResponse = await axios.get<Record<string, unknown>[]>(
+			`${APIFY_BASE_URL}/datasets/${datasetId}/items?token=${token}&format=json`,
+			{ timeout: 30_000 },
+		);
+
+		return datasetResponse.data;
 	} catch (err) {
 		const message = err instanceof Error ? err.message : String(err);
 		throw new ScrapeServiceError(

@@ -31,15 +31,6 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-	serverExternalPackages: [
-		"apify-client",
-		"proxy-agent",
-		"pac-proxy-agent",
-		"socks-proxy-agent",
-		"http-proxy-agent",
-		"https-proxy-agent",
-		"agent-base",
-	],
 	async headers() {
 		return [{ source: "/(.*)", headers: securityHeaders }];
 	},
