@@ -259,7 +259,7 @@ export default function Home() {
 
 			{/* Footer */}
 			<footer className="border-t border-border py-8">
-				<div className="mx-auto max-w-6xl px-4 text-center text-sm text-muted-foreground">
+				<div className="mx-auto max-w-6xl px-4 text-center text-sm text-muted-foreground space-y-1">
 					<p>© 2026 AutoIG. Todos os direitos reservados.</p>
 					<p>
 						Desenvolvido por{" "}
@@ -270,6 +270,15 @@ export default function Home() {
 						>
 							dalio.io
 						</Link>
+					</p>
+					<p>
+						Contato:{" "}
+						<a
+							href="mailto:contato@dalio.io"
+							className="underline hover:text-foreground transition-colors"
+						>
+							contato@dalio.io
+						</a>
 					</p>
 				</div>
 			</footer>

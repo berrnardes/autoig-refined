@@ -11,6 +11,7 @@ import {
 import { api } from "@/lib/api-client";
 import { useEvaluation } from "@/lib/hooks";
 import type { GuideContent } from "@/types";
+import { ContactSupport } from "@/components/contact-support";
 import Link from "next/link";
 import { use } from "react";
 
@@ -169,10 +170,11 @@ export default function EvaluationDetailPage({
 
 			{evaluation.status === "failed" && (
 				<Card className="mb-6">
-					<CardContent className="py-6 text-center">
+					<CardContent className="py-6 text-center space-y-2">
 						<p className="text-sm text-destructive">
 							A avaliação falhou. Seu crédito foi reembolsado.
 						</p>
+						<ContactSupport />
 					</CardContent>
 				</Card>
 			)}

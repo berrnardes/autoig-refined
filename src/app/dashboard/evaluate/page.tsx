@@ -235,7 +235,7 @@ function getSubmitErrorMessage(err: unknown): SubmitError {
 			field: "competitors",
 		};
 	}
-	return { message: "Erro ao criar avaliação. Tente novamente." };
+	return { message: "Erro ao criar avaliação. Tente novamente. Se o problema persistir, entre em contato: contato@dalio.io" };
 }
 
 export default function EvaluatePage() {
