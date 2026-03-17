@@ -13,11 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signUp } from "@/lib/auth/client";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function RegisterPage() {
-	const router = useRouter();
 	const [name, setName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
@@ -34,7 +32,9 @@ export default function RegisterPage() {
 			const { error: signUpError } = await signUp.email(
 				{ email, password, name },
 				{
-					onSuccess: () => router.push("/dashboard"),
+					onSuccess: () => {
+						window.location.href = "/dashboard";
+					},
 					onError: () =>
 						setError("Não foi possível criar a conta. Tente novamente."),
 				},
